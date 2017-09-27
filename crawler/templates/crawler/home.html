@@ -1,0 +1,87 @@
+{% extends "crawler/customuser.html" %}
+{% block content %}
+{% load staticfiles %}
+
+{% if user.is_authenticated and user.username %}
+
+        <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3" style="text-align: center">
+                <img src='{% static "crawler/media/exaro.png" %}' style="margin-top: 20px"/>
+            </div>
+             <form class="col-md-6 col-md-offset-3" method=get>
+                <div class="input-group">
+                    <br/>
+                    <br/>
+                    <br/>
+                     <input type="text" class="form-control" name="query" placeholder="Enter your query"/>
+                    <span class="input-group-btn">
+                            <br/>
+                            <br/>
+                            <br/>
+                             <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </span>
+
+                </div>
+
+                <br/>
+                <div class="container " style="text-align:center;">
+                    <select name="theme" class="selectpicker " data-style="btn-info">
+                        <option value="all">All Themes</option>
+                        <option value="tech">Technology</option>
+                        <option value="business">Business</option>
+                        <option value="energy">Energy</option>
+			 <option value="agri">Agriculture</option>
+                        <option value="water">Water</option>
+                        <option value="people">People</option>
+                        <option value="ent">Entertainment</option>
+
+                    </select>
+    
+                </div>
+
+            </form>
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="container " style="margin-top:30px; text-align: center;">
+         <hr/>
+            <p>&copy;  Powered by    
+             <img src='{% static "crawler/media/cortexlogiclogo.jpg" %}' width="200"  height ="80"/></p>
+    </div>
+
+      <div class="table-hover" style="margin-top: 30px">
+                {% for row in feed.articles %}
+                    <div class="col-md-4 col-xs-12 scard pull-right">
+                        <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
+                              <div class="card small">
+                                <div class="card-image">
+                                  <img src="{{row.urlToImage}}">
+                                </div>
+                                <div class="card-content">
+                                  <p ><b>{{row.title}}</b></p>
+                                </div>
+                                
+                              </div>
+                         </div>
+                        <br/>
+                    </div> 
+                 
+                {% endfor %}
+            
+    </div>
+
+    <br/>
+    {% else %}
+        <p>Welcome anonymous user!
+            You need to <a href="/login/">login</a></p>
+    {% endif %}
+
+
+{% endblock %}
+
+

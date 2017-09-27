@@ -1,0 +1,39 @@
+{% extends "crawler/customuser.html" %}
+{% block content %}
+{% load staticfiles %}
+
+{% if user.is_authenticated and user.username %}
+
+        <div class="container">
+        <div class="row">
+      <div class="table-hover" style="margin-top: 30px">
+                {% for row in feed.articles %}
+                    <div class="col-md-4 col-xs-12 scard pull-right">
+                        <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
+                              <div class="card small">
+                                <div class="card-image">
+                                  <img src="{{row.urlToImage}}">
+                                </div>
+                                <div class="card-content">
+                                  <p ><b>{{row.title}}</b></p>
+                                </div>
+                                
+                              </div>
+                         </div>
+                        <br/>
+                    </div> 
+                 
+                {% endfor %}
+            
+    </div>
+
+    <br/>
+    {% else %}
+        <p>Welcome anonymous user!
+            You need to <a href="/login/">login</a></p>
+    {% endif %}
+
+
+{% endblock %}
+
+

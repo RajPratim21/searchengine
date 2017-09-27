@@ -1,0 +1,20 @@
+{% extends "crawler/layout.html" %}
+
+
+{% block content %}
+{% load staticfiles %}
+<div class="jumbotron content" style="text-align: center">
+    <img id="logo" src='{% static "crawler/media/exaro.png" %}' style="margin-top: 20px"/>
+    <br/>
+	<form method="post" action="." id="signupForm">
+		{{ form.as_p }}
+		<input type="submit" class="btn-success btn-lg submitButton" value="Register" />
+		{% csrf_token %}
+	</form>
+		
+
+</div>
+
+ 
+
+{% endblock %}

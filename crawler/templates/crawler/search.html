@@ -1,0 +1,104 @@
+{% extends "crawler/user_layout.html" %}
+{% block content %}
+{% load staticfiles %}
+
+{% if user.is_authenticated and user.username %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 container" style="text-align: center">
+                <img src='{% static "crawler/media/exaro.png" %}' style="margin-top: 20px; height:auto width=90% max-width=400px"/>
+            </div>
+
+            <form class="col-md-6 col-md-offset-3" method=get>
+                <div class="input-group">
+                    <br/>
+                    <input type="text" class="form-control" name="query" placeholder="Enter your query"/>
+                    <span class="input-group-btn">
+                        <br/>
+                        <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </span>
+
+                </div>
+                <br/>
+                <div class="container " style="text-align:center;">
+                    <select name="theme" class="selectpicker " data-style="btn-info">
+                        <option value="all">All Themes</option>
+                        <option value="tech">Technology</option>
+                        <option value="business">Business</option>
+                        <option value="energy">Energy</option>
+	        	<option value="agri">Agriculture</option>
+			<option value="water">Water</option>
+			<option value="people">People</option>
+        	   	<option value="ent">Entertainment</option>
+	
+ 		</select>
+                     
+                </div>
+
+            </form>
+        </div>
+
+
+<div class="col-sm-4 col-xs-12 pull-right">
+           <ul>
+           {% for row in summary %}
+            <div class="rowarticle" onclick="window.location.href={{row.url}};">
+                  <div class="card auto" >
+                    <div class="card-image">
+                      <img src={{row.img}}>
+                    </div>
+                    <div class="card-content">
+                      <p >{{row.text}}</p>
+                    </div>
+                    
+                  </div>
+             </div>
+        <br/> 
+             {% endfor %}
+        </ul>
+    </div>
+
+	<div class="col-sm-8 scard">     
+        <table class="table-hover" style="margin-top: 30px">
+            {% for row in results %}
+            <tr >
+                <td>
+                    </br>
+                    <a href="{{row.link}}"><b style="color:darkgreen; font-family: Verdana,sans-serif">{{row.header}}</b></a><br/>
+                    <l style="color:darkblue; font-family: sans-serif">{{row.link}}</l>
+
+                    <p style="font-family: sans-serif">{{row.data}}</p>
+<div>
+                    <l  type="button" style=  "padding: 3px 7px !important;font-size: 13px !important;
+                        background-color: #402E20;font-weight: bold;text-shadow: 1px 1px black;color: #ffffff;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid black;cursor: pointer;
+                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;">{{row.theme}}</l>
+
+                     {% for val in row.entity%}
+                         <l type="button" style=" margin-left: 5px; padding: 3px 7px !important;font-size: 13px !important;
+                        background-color: #E1E1E1;text-shadow: 1px 1px #57D6C7;color: black;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid #57D6C7;cursor: pointer;
+                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;">{{val}}</l>
+                    {% endfor %}
+                    </div>                    
+                </td>
+                    
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+</div>
+    
+
+    
+{% else %}
+    <p>Welcome anonymous user!
+        You need to <a href="/login/">login</a></p>
+{% endif %}
+
+
+{% endblock %}
+
