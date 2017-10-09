@@ -12,7 +12,18 @@
             <form class="col-md-6 col-md-offset-3" method=get>
                 <div class="input-group">
                     <br/>
-                    <input type="text" class="form-control" name="query" placeholder="Enter your query"/>
+			 <input type="text" autocomplete="off" class="form-control" list="suggest" id="searchtext" name="query" value="{{query}}" />
+
+                    <datalist id="suggest">
+
+                    </datalist>
+
+                   
+
+
+
+
+
                     <span class="input-group-btn">
                         <br/>
                         <button class="btn btn-default" type="submit">
@@ -22,8 +33,63 @@
 
                 </div>
                 <br/>
+		 <script>
+
+                    console.log("Hi");
+
+                    var bar=document.getElementById("searchtext");
+
+                    bar.oninput = function() {myFunction()};
+
+
+
+                    function myFunction() {
+
+                        //alert("The value of the input field was changed.");
+
+                        console.log(bar.value);
+
+                        var url = "/get_suggestion?query="+bar.value;
+
+
+
+                        var jsonFile = new XMLHttpRequest();
+
+                        jsonFile.open("GET",url,true);
+
+                        jsonFile.send();
+
+
+
+                        jsonFile.onreadystatechange = function() {
+
+                            if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+
+                                //console.log(jsonFile.responseText);
+
+                                var resp=JSON.parse(jsonFile.responseText);
+
+                                var options = '';
+
+                                console.log(resp[1]);
+
+                                for(var i = 0; i < resp[1].length; i++)
+
+                                    options += '<option value="'+resp[1][i]+'" />';
+
+                                document.getElementById('suggest').innerHTML = options;
+
+                            }
+
+                         }
+
+                    }
+
+                </script>
+
+
                 <div class="container " style="text-align:center;">
-                    <select name="theme" class="selectpicker " data-style="btn-info">
+                    <select name="theme" class="testselect " data-style="btn-info">
                         <option value="all">All Themes</option>
                         <option value="tech">Technology</option>
                         <option value="business">Business</option>
@@ -39,7 +105,25 @@
 
             </form>
         </div>
+	  <div align="center" id="google_translate_element"></div>
 
+
+
+            <script type="text/javascript">
+
+            function googleTranslateElementInit() {
+
+              new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+
+            }
+
+            </script>
+
+            <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+
+            </script>
+
+          
 
 <div class="col-sm-4 col-xs-12 pull-right">
            <ul>

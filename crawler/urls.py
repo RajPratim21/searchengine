@@ -3,7 +3,10 @@ from . import views
 
 urlpatterns = [
 	url(r'^crawler$', views.start, name='start'),
+	url(r'^config$', views.config, name='config'),
+	url(r'^add_config$', views.add_config, name='add_config'),
 	url(r'^signup$', views.signup, name='signup'),
+        url(r'^get_suggestion$', views.get_suggestion, name='get_suggestion'),
 	url(r'^login/$', 'django.contrib.auth.views.login',kwargs={'template_name': 'crawler/login.html'}, ),
 	url(r'^home$', views.home, name='home'),
 	url(r'^crawler_heavy$', views.crawl_page, name='crawl_page'),

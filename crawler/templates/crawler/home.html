@@ -14,8 +14,10 @@
                     <br/>
                     <br/>
                     <br/>
-                     <input type="text" class="form-control" name="query" placeholder="Enter your query"/>
-                    <span class="input-group-btn">
+                    <input type="text" autocomplete="off" class="form-control" list="suggest" id="searchtext" name="query" value="{{query}}" />
+                    <datalist id="suggest">
+                    </datalist>
+			<span class="input-group-btn">
                             <br/>
                             <br/>
                             <br/>
@@ -25,7 +27,33 @@
                     </span>
 
                 </div>
+		<script>
+                    console.log("Hi");
+                    var bar=document.getElementById("searchtext");
+                    bar.oninput = function() {myFunction()};
 
+                    function myFunction() {
+                        //alert("The value of the input field was changed.");
+                        console.log(bar.value);
+                        var url = "/get_suggestion?query="+bar.value;
+
+                        var jsonFile = new XMLHttpRequest();
+                        jsonFile.open("GET",url,true);
+                        jsonFile.send();
+
+                        jsonFile.onreadystatechange = function() {
+                            if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+                                //console.log(jsonFile.responseText);
+                                var resp=JSON.parse(jsonFile.responseText);
+                                var options = '';
+                                console.log(resp[1]);
+                                for(var i = 0; i < resp[1].length; i++)
+                                    options += '<option value="'+resp[1][i]+'" />';
+                                document.getElementById('suggest').innerHTML = options;
+                            }
+                         }
+                    }
+                </script>
                 <br/>
                 <div class="container " style="text-align:center;">
                     <select name="theme" class="selectpicker " data-style="btn-info">
@@ -39,15 +67,22 @@
                         <option value="ent">Entertainment</option>
 
                     </select>
-    
+   		 
                 </div>
 
             </form>
-
             </div>
         </div>
     </div>
-    
+     <div align="center" id="google_translate_element"></div>
+
+            <script type="text/javascript">
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+            }
+            </script>
+            <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+            </script>
     <div class="container " style="margin-top:30px; text-align: center;">
          <hr/>
             <p>&copy;  Powered by    
@@ -60,10 +95,16 @@
                         <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
                               <div class="card small">
                                 <div class="card-image">
-                                  <img src="{{row.urlToImage}}">
+                                  <img src="{{row.image}}">
                                 </div>
                                 <div class="card-content">
-                                  <p ><b>{{row.title}}</b></p>
+                               <div class="category definition"  style="padding: 3px 7px !important;font-size: 13px !important;
+                        background-color: #0007ff;font-weight: bold;text-shadow: 1px 1px black;color: #ffffff;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid black;cursor: pointer;
+                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;"> <p><b> {{row.Category}}</b></p></div>
+                        
+         
+				 <p ><b>{{row.title}}</b></p>
                                 </div>
                                 
                               </div>

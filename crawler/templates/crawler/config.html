@@ -1,206 +1,318 @@
+<!DOCTYPE html>
 <html>
-<head>
-<style>
-.content{
-	background: white;
-}
-.submitButton{
-	border: none;
-    box-shadow: 4px 4px 10px grey;
-    width: 120px;
-}
-label{
-	color:black;
-	font-family:Arial;
-	
-}
-form {
-    margin-top: 50px;
-    margin-bottom: 100px;
-    margin-right: 20px;
-    margin-left: 20px;
-}
-form div ul
-{
-    list-style-type: none;
-    color:black;
-    font-family:Couirer New;
-    text-align: center;
-    	border: 1px solid grey;
-    width: auto;
-    height:80px;
-    padding: 20px;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 5px 5px 20px grey;
-    background-color:white;
-    overflow: auto
-    float:bottom;
-}
-form div 
-{
-    list-style-type: none;
-    color:black;
-    font-family:Couirer New;
-    text-align: center;
-    	border: 1px solid grey;
-    width: auto;
-    height:600px;
-    padding: 20px;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 5px 5px 20px grey;
-    background-color:#D0D0D0;
-    overflow: auto
-    float:bottom;
-}
-ul li{
-	
-	display: inline-block;
-	
-}
+    <head>
+        <style>
+		
+			.vis-hidden {
+				border: 0;
+				clip: rect(0 0 0 0);
+				height: 1px;
+				margin: -1px;
+				overflow: hidden;
+				padding: 0;
+				position: absolute;
+				width: 1px;
+			}
 
-ul li label{
-	color:black;
-    font-family:Couirer New;
-        margin:4px;
-    background-color:#EFEFEF;
-    border-radius:9px;
-    border:1px solid #D0D0D0;
-    overflow:auto;
-    float:left;
-    box-shadow: 5px 5px 20px grey;
-    padding:5px;
-    
-}
-.header {
-    height:50px;
-    background:#6495ED;
-    border:1px solid #CCC;
-    width:100%;
-    color:white;
-    margin:0px auto;
-    text-align:center;
-    float:top;
-    text-shadow: 1px 1px #57D6C7;
-    -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
--webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-}
-ul li label:hover{
-border-color:blue;
-}
-.button{
-padding: 10px 15px 11px !important;
-font-size: 18px !important;
-background-color: #57d6c7;
-font-weight: bold;
-text-shadow: 1px 1px #57D6C7;
-color: #ffffff;
-border-radius: 5px;
--moz-border-radius: 5px;
--webkit-border-radius: 5px;
-border: 1px solid #57D6C7;
-cursor: pointer;
-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
--moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
--webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-margin-left:600px;
-    
-}
-.category{
-padding: 10px 15px 11px !important;
-font-size: 18px !important;
-background-color: #3CB371;
-font-weight: bold;
-text-shadow: 1px 1px #57D6C7;
-color: #ffffff;
-border-radius: 5px;
--moz-border-radius: 5px;
--webkit-border-radius: 5px;
-border: 1px solid #3CB371;
-cursor: pointer;
-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
--moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
--webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-float:center;
-    
-}
-ul li INPUT{
-	border-radius: 10px;
-	color:#0099FF;
-}
-input[type=checkbox] {
-	-webkit-appearance: none;
-	background-color: black;
-	border: 4px solid black;
-	box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
-	padding: 6px;
-	border-radius: 15px;
-	display: inline-block;
-	position: relative;
-}
-input[type=checkbox]:checked {
-	background-color: #0099FF;
-	border: 4px solid black;
-	box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05), inset 15px 10px -12px rgba(255,255,255,0.1);
-	padding: 6px;
-	border-radius: 15px;
-	display: inline-block;
-	position: relative;
-}
-</style>
-</head>
-<body>
-<h1 class=header>Choose your keywords</h1>
-<form>
-<div>
-<h3 class=category>Technlogy</h3>
-<ul>
-                        
-<li><label><input type="checkbox" name="category 1" value="Technology in societ">Technology in societ</label><br></li>
-<li><label><input type="checkbox" name="category 2" value="Technical communication">Technical communication</label><br></li>
-<li><label><input type="checkbox" name="category 3" value="category 3">Obsolete technologies</label><br></li>
-<li><label><input type="checkbox" name="category 4" value="category 4">Wikipedia books on technology</label><br></li>
-<li><label><input type="checkbox" name="category 5" value="category 5">Technology neologisms</label><br></li>
-<li><label><input type="checkbox" name="category 6" value="category 6">Technological comparison</label><br></li>
-<li><label><input type="checkbox" name="category 7" value="category 7">Technology folklore</label><br></li>
-<li><label><input type="checkbox" name="category 8" value="category 8">Science parks</label><br></li>
-<li><label><input type="checkbox" name="category 9" value="category 9">Hypothetical technology</label><br></li>
+			label {
+			  margin: 10px;
+			  padding: 5px;
+			}
 
-</ul>
-<h3 class=category>bussiness</h3>
-<ul>
- 
-<li><label><input type="checkbox" name="category 1" value="category 1">Business models</label><br></li>
-<li><label><input type="checkbox" name="category 2" value="category 2">Management</label><br></li>
-<li><label><input type="checkbox" name="category 3" value="category 3">Business timelines</label><br></li>
-<li><label><input type="checkbox" name="category 4" value="category 4">Business ethics</label><br></li>
-<li><label><input type="checkbox" name="category 5" value="category 5">Operations research</label><br></li>
-<li><label><input type="checkbox" name="category 6" value="category 6">Business and industry awards</label><br></li>
-<li><label><input type="checkbox" name="category 7" value="category 7">Sales</label><br></li>
-<li><label><input type="checkbox" name="category 8" value="category 8">Business opportunities</label><br></li>
-<li><label><input type="checkbox" name="category 8" value="category 8">Business economics</label><br></li>
+			input:focus + label {
+			  background-color: white;
+			}
 
-</ul>
-<h3 class=category>Energy</h3>
-<ul>
-<li><label><input type="checkbox" name="category 1" value="category 1">Energy storage</label><br></li>
-<li><label><input type="checkbox" name="category 2" value="category 2">Energy conversion</label><br></li>
-<li><label><input type="checkbox" name="category 3" value="category 3">People associated with energy</label><br></li>
-<li><label><input type="checkbox" name="category 4" value="category 4">Energy technology</label><br></li>
-<li><label><input type="checkbox" name="category 5" value="category 5">Energy economics</label><br></li>
-<li><label><input type="checkbox" name="category 6" value="category 6">Energy recovery</label><br></li>
-<li><label><input type="checkbox" name="category 7" value="category 7">Technology folklore</label><br></li>
-<li><label><input type="checkbox" name="category 8" value="category 8">Proposed energy project</label><br></li>
-<li><label><input type="checkbox" name="category 8" value="category 8">Energy sources</label><br></li>
+			input:checked + label {
+			  background-color: rgb(240,240,240);
+			}
+            
+            body{
+                font-family: sans-serif;
+            }
+            .main{
+                border: 2px solid black;
+                border-radius: 30px;
+                margin: 10px;
+                padding: 20px;
+            }
+            h2{
+                text-align: right;
+                margin: 0 50px 0 0;
+            }
 
+            .options div{
+                display: inline-block;
+                border: 1px solid black;
+                border-radius: 10px;
+                padding: 0.8% 1%;
+                margin: 0 0.5% 20px 0.5%;
+                font-weight: bold;
+                box-shadow: 0px 0px 5px lightgrey;
+            }
+			
+			button{
+				border: 1px solid black;
+                border-radius: 10px;
+                padding: 0.8% 1%;
+                margin: 0 0.5% 20px 0.5%;
+                font-weight: bold;
+                box-shadow: 0px 0px 5px lightgrey;
+			}
+			
+            .leftSideBar, .rightSideBar{
+                display: inline-block;
+            }
+            .leftSideBar{
+                float: left;
+                width: 20%;
+                text-align: center;
+                font-weight: bold;
+                margin-left: 0.5%; 
+            }
+            .leftSideBar div{
+                float: left;
+                background-color: rgb(223,235,247);
+                padding: 10px;
+                position: relative;
+            }
+            .rightSideBar{
+                width: 79%;
+            }
+            .rightSideBar div{
+                display: inline-block;
+                width: 24%;
+                text-align: center;
+                margin: 5px;
+                font-size: 18px;
+            }
+            .border{
+                border: 1px solid black;
+                margin: 40px 0;
+            }
+            @media screen and (max-width: 530px) {
+                .rightSideBar{
+                    margin-top: 40px;
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            <h2>Configuration</h2>
+			<form action="./add_config" method="get">
+            <div class="options">
+                <div>Add Search Themes</div>
+                <div>Add Keywords</div>
+                <div>Keyword Suggestions</div>  
+				<button type="submit" value="Submit">Submit</button>  
+            </div>
+            <div class="wrapper">
+                <div class="leftSideBar">
+                    <div>Business</div>
+                </div>
+                <div class="rightSideBar">
+                   <div><input id="chk_aliens1vv" type="checkbox" name="Business" class="vis-hidden new-post-tags" value="Business" />
+                                                <label for="chk_aliens1vv">Business</label></div>
 
-</ul>
-</div>
-<a href="#" onclick="history.go(-1)"><input type="submit" style="float:center" styel="float:center;"class=button value="Done" /></a>
+		    <div><input id="chk_aliens1" type="checkbox" name="E-Commerce" class="vis-hidden new-post-tags" value="E-Commerce" />
+						<label for="chk_aliens1">E-Commerce</label></div>
+                    <div><input id="chk_aliens2" type="checkbox" name="Electronics" class="vis-hidden new-post-tags" value="Electronics" />
+						<label for="chk_aliens2">Electronics</label></div>
+                    <div><input id="chk_aliens3" type="checkbox" name="finance" class="vis-hidden new-post-tags" value="finance" />
+						<label for="chk_aliens3">finance</label></div>
+                    <div><input id="chk_aliens4" type="checkbox" name="Auditing" class="vis-hidden new-post-tags" value="Auditing" />
+						<label for="chk_aliens4">Auditing</label></div>
+                    <div><input id="chk_aliens5" type="checkbox" name="Banking" class="vis-hidden new-post-tags" value="Banking" />
+						<label for="chk_aliens5">Banking</label></div>
+                    <div><input id="chk_aliens6" type="checkbox" name="Insurance" class="vis-hidden new-post-tags" value="Insurance" />
+						<label for="chk_aliens6">Insurance</label></div>
+                    <div><input id="chk_aliens7" type="checkbox" name="Magazines" class="vis-hidden new-post-tags" value="Magazines" />
+						<label for="chk_aliens7">Magazines</label></div>
+                    <div><input id="chk_aliens8" type="checkbox" name="Real Estate" class="vis-hidden new-post-tags" value="Real Estate" />
+						<label for="chk_aliens8">Real Estate</label></div>
+                    <div><input id="chk_aliens9" type="checkbox" name="Investment" class="vis-hidden new-post-tags" value="Investment" />
+						<label for="chk_aliens9">Investment</label></div>
+                    <div><input id="chk_aliens0" type="checkbox" name="Manufacturing" class="vis-hidden new-post-tags" value="Manufacturing" />
+						<label for="chk_aliens0">Manufacturing</label></div>
+                    <div><input id="chk_aliensa" type="checkbox" name="Security" class="vis-hidden new-post-tags" value="Security" />
+						<label for="chk_aliensa">Security</label></div>
+                    <div><input id="chk_aliensb" type="checkbox" name="Small_Business" class="vis-hidden new-post-tags" value="Small_Business" />
+						<label for="chk_aliensb">Small Business</label></div>
+                    <div><input id="chk_aliensn" type="checkbox" name="Marketing" class="vis-hidden new-post-tags" value="Marketing" />
+						<label for="chk_aliensn">Marketing</label></div>
+                    <div><input id="chk_aliensc" type="checkbox" name="Advertising" class="vis-hidden new-post-tags" value="Advertising" />
+						<label for="chk_aliensc">Advertising</label></div>
+                    <div><input id="chk_aliensd" type="checkbox" name="Taxation" class="vis-hidden new-post-tags" value="Taxation" />
+						<label for="chk_aliensd">Taxation</label></div>
+                                    </div>
+            </div>
+            <div class="border"></div>
+            <div class="wrapper">
+                <div class="leftSideBar">
+                    <div>Sports</div>
+                </div>
+                 <div class="rightSideBar">
+                   <div><input id="chk_aliens1vv" type="checkbox" name="Sports" class="vis-hidden new-post-tags" value="Sports" />
+                                                <label for="chk_aliens1vv">Sports</label></div>
 
-</form>
-</body>
-</html>
+		    <div><input id="chk_aliens1aa" type="checkbox" name="Cricket" class="vis-hidden new-post-tags" value="Cricket" />
+						<label for="chk_aliens1aa">Cricket</label></div>
+                    <div><input id="chk_aliens1da" type="checkbox" name="Football" class="vis-hidden new-post-tags" value="Football" />
+						<label for="chk_aliens1da">Football</label></div>
+                    <div><input id="chk_aliens1s" type="checkbox" name="Golf" class="vis-hidden new-post-tags" value="Golf" />
+						<label for="chk_aliens1s">Golf</label></div>
+                    <div><input id="chk_aliens1c" type="checkbox" name="Gymnastics" class="vis-hidden new-post-tags" value="Gymnastics" />
+						<label for="chk_aliens1c">Gymnastics</label></div>
+                    <div><input id="chk_aliens1x" type="checkbox" name="Hockey" class="vis-hidden new-post-tags" value="Hockey" />
+						<label for="chk_aliens1x">Hockey</label></div>
+                    <div><input id="chk_aliens1z" type="checkbox" name="Horse_Racing" class="vis-hidden new-post-tags" value="Horse_Racing" />
+						<label for="chk_aliens1z">Horse Racing</label></div>
+                    <div><input id="chk_aliens1e" type="checkbox" name="Baseball" class="vis-hidden new-post-tags" value="Baseball" />
+						<label for="chk_aliens1e">Baseball</label></div>
+                    <div><input id="chk_aliens1w" type="checkbox" name="Basketball" class="vis-hidden new-post-tags" value="Basketball" />
+						<label for="chk_aliens1w">Basketball</label></div>
+                    <div><input id="chk_aliens1q" type="checkbox" name="Billiards" class="vis-hidden new-post-tags" value="Billiards" />
+						<label for="chk_aliens1q">Billiards</label></div>
+                    <div><input id="chk_aliens1t" type="checkbox" name="Running" class="vis-hidden new-post-tags" value="Running" />
+						<label for="chk_aliens1t">Running</label></div>
+                    <div><input id="chk_aliens1y" type="checkbox" name="Soccer" class="vis-hidden new-post-tags" value="Soccer" />
+						<label for="chk_aliens1y">Soccer</label></div>
+                    <div><input id="chk_aliens1u" type="checkbox" name="Tennis" class="vis-hidden new-post-tags" value="Tennis" />
+						<label for="chk_aliens1u">Tennis</label></div>
+                    <div><input id="chk_aliens1i" type="checkbox" name="Water_Sports" class="vis-hidden new-post-tags" value="Water_Sports" />
+						<label for="chk_aliens1i">Water Sports</label></div>
+                                    </div>
+            </div>
+                  <div class="border"></div>
+            <div class="wrapper">
+                <div class="leftSideBar">
+                    <div>Technology</div>
+                </div>
+                <div class="rightSideBar">
+		    <div><input id="chk_aliens1i1vve" type="checkbox" name="Technology" class="vis-hidden new-post-tags" value="Technology" />
+                                                <label for="chk_aliens1i1vve">Technology</label></div>
+
+                    <div><input id="chk_aliens1i1" type="checkbox" name="Software" class="vis-hidden new-post-tags" value="Software" />
+						<label for="chk_aliens1i1">Software</label></div>
+                    <div><input id="chk_aliens1i2" type="checkbox" name="Web_Design" class="vis-hidden new-post-tags" value="Web_Design" />
+						<label for="chk_aliens1i2">Web Design</label></div>
+                    <div><input id="chk_aliens1i3" type="checkbox" name="bots" class="vis-hidden new-post-tags" value="bots" />
+						<label for="chk_aliens1i3">bots</label></div>
+                    <div><input id="chk_aliens1i4" type="checkbox" name="Graphics" class="vis-hidden new-post-tags" value="Graphics" />
+						<label for="chk_aliens1i4">Graphics</label></div>
+                    <div><input id="chk_aliens1i5" type="checkbox" name="Internet" class="vis-hidden new-post-tags" value="Internet" />
+						<label for="chk_aliens1i5">Internet</label></div>
+                    <div><input id="chk_aliens1i7" type="checkbox" name="Mobile_Computing" class="vis-hidden new-post-tags" value="Mobile_Computing" />
+						<label for="chk_aliens1i7">Mobile Computing</label></div>
+                    <div><input id="chk_aliens1i8" type="checkbox" name="ai" class="vis-hidden new-post-tags" value="ai" />
+						<label for="chk_aliens1i8">Artificial Intelligence</label></div>
+                    <div><input id="chk_aliens1i9" type="checkbox" name="ml" class="vis-hidden new-post-tags" value="ml" />
+						<label for="chk_aliens1i9">Machine learning</label></div>
+                    <div><input id="chk_aliens1i0" type="checkbox" name="Engineering" class="vis-hidden new-post-tags" value="Engineering" />
+						<label for="chk_aliens1i0">Engineering</label></div>
+                    <div><input id="chk_aliens1ia" type="checkbox" name="iot" class="vis-hidden new-post-tags" value="iot" />
+						<label for="chk_aliens1ia">Internet Things</label></div>
+                    <div><input id="chk_aliens1is" type="checkbox" name="Multimedia" class="vis-hidden new-post-tags" value="Multimedia" />
+						<label for="chk_aliens1is">Multimedia</label></div>
+                    <div><input id="chk_aliens1id" type="checkbox" name="Science" class="vis-hidden new-post-tags" value="Science" />
+						<label for="chk_aliens1id">Science</label></div>
+                    <div><input id="chk_aliens1if" type="checkbox" name="Telecommunications" class="vis-hidden new-post-tags" value="Telecommunications" />
+						<label for="chk_aliens1if">Telecommunications</label></div>
+                    <div><input id="chk_aliens1ig" type="checkbox" name="Biotechnology" class="vis-hidden new-post-tags" value="Biotechnology" />
+						<label for="chk_aliens1ig">Biotechnology</label></div>
+                    <div><input id="chk_aliens1ih" type="checkbox" name="Chemistry" class="vis-hidden new-post-tags" value="Chemistry" />
+						<label for="chk_aliens1ih">Chemistry</label></div>
+                    <div><input id="chk_aliens1ij" type="checkbox" name="Electronics" class="vis-hidden new-post-tags" value="Electronics" />
+						<label for="chk_aliens1ij">Electronics</label></div>
+                    <div><input id="chk_aliens1ik" type="checkbox" name="Mechanics" class="vis-hidden new-post-tags" value="Mechanics" />
+						<label for="chk_aliens1ik">Mechanics</label></div>
+                    <div><input id="chk_aliens1il" type="checkbox" name="Health" class="vis-hidden new-post-tags" value="Health" />
+						<label for="chk_aliens1il">Health</label></div>
+                    <div><input id="chk_aliens1im" type="checkbox" name="Open Source" class="vis-hidden new-post-tags" value="Open Source" />
+						<label for="chk_aliens1im">Open Source</label></div>
+                                    </div>
+            </div>
+            <div class="border"></div>
+            <div class="wrapper">
+                <div class="leftSideBar">
+                    <div>Energy</div>
+                </div>
+                <div class="rightSideBar">
+		  <div><input id="chk_aliens1im1vev" type="checkbox" name="Energy" class="vis-hidden new-post-tags" value="Energy" />
+                                                <label for="chk_aliens1im1vev">Energy</label></div>
+
+                    <div><input id="chk_aliens1im1" type="checkbox" name="Solar Energy" class="vis-hidden new-post-tags" value="Solar Energy" />
+						<label for="chk_aliens1im1">Solar Energy</label></div>
+                    <div><input id="chk_aliens1im2" type="checkbox" name="Electric power" class="vis-hidden new-post-tags" value="Electric power" />
+						<label for="chk_aliens1im2">Electric power</label></div>
+                    <div><input id="chk_aliens1im3" type="checkbox" name="Fuels" class="vis-hidden new-post-tags" value="Fuels" />
+						<label for="chk_aliens1im3">Fuels</label></div>
+                    <div><input id="chk_aliens1im4" type="checkbox" name="Geothermal Energy" class="vis-hidden new-post-tags" value="Geothermal Energy" />
+						<label for="chk_aliens1im4">Geothermal Energy</label></div>
+                    <div><input id="chk_aliens1im5" type="checkbox" name="Oil" class="vis-hidden new-post-tags" value="Oil" />
+						<label for="chk_aliens1im5">Oil</label></div>
+                    <div><input id="chk_aliens1im6" type="checkbox" name="Smart Grid" class="vis-hidden new-post-tags" value="Smart Grid" />
+						<label for="chk_aliens1im6">Smart Grid</label></div>
+                    <div><input id="chk_aliens1im7" type="checkbox" name="Mining" class="vis-hidden new-post-tags" value="Mining" />
+						<label for="chk_aliens1im7">Mining</label></div>
+                    <div><input id="chk_aliens1im8" type="checkbox" name="Coal" class="vis-hidden new-post-tags" value="Coal" />
+						<label for="chk_aliens1im8">Coal</label></div>
+                    <div><input id="chk_aliens1im9" type="checkbox" name="Wind energy" class="vis-hidden new-post-tags" value="wind energy" />
+						<label for="chk_aliens1im9">Wind energy</label></div>
+                    <div><input id="chk_aliens1im0" type="checkbox" name="Renewable Energy" class="vis-hidden new-post-tags" value="Renewable Energy" />
+						<label for="chk_aliens1im0">Renewable Energy</label></div>
+                    <div><input id="chk_aliens1imw" type="checkbox" name="Nuclear Energy" class="vis-hidden new-post-tags" value="Nuclear Energy" />
+						<label for="chk_aliens1imw">Nuclear Energy</label></div>
+                    <div><input id="chk_aliens1ima" type="checkbox" name="hydroelectricity" class="vis-hidden new-post-tags" value="hydroelectricity" />
+						<label for="chk_aliens1ima">hydroelectricity</label></div>
+                    <div><input id="chk_aliens1ims" type="checkbox" name="Natural Gas" class="vis-hidden new-post-tags" value="Natural Gas" />
+						<label for="chk_aliens1ims">Natural Gas</label></div>
+                                    </div>
+            </div>
+            <div class="border"></div>
+            <div class="wrapper">
+                <div class="leftSideBar">
+                    <div>Miscellaneous</div>
+                </div>
+                <div class="rightSideBar">
+                    <div><input id="chk_aliens1im1z" type="checkbox" name="Holidays" class="vis-hidden new-post-tags" value="Holidays" />
+                                                <label for="chk_aliens1im1z">Holidays</label></div>
+		 <div><input id="chk_aliens1im1xz" type="checkbox" name="Travel" class="vis-hidden new-post-tags" value="Travel" />
+                                                <label for="chk_aliens1im1xz">Travel</label></div>
+
+                    <div><input id="chk_aliens1im2z" type="checkbox" name="Language" class="vis-hidden new-post-tags" value="Language" />
+                                                <label for="chk_aliens1im2z">Language</label></div>
+                    <div><input id="chk_aliens1im3z" type="checkbox" name="Military" class="vis-hidden new-post-tags" value="Military" />
+                                                <label for="chk_aliens1im3z">Military</label></div>
+                    <div><input id="chk_aliens1im4z" type="checkbox" name="Philosophy" class="vis-hidden new-post-tags" value="Philosophy" />
+                                                <label for="chk_aliens1im4z">Philosophy</label></div>
+                    <div><input id="chk_aliens1im5z" type="checkbox" name="Politics" class="vis-hidden new-post-tags" value="Politics" />
+                                                <label for="chk_aliens1im5z">Politics</label></div>
+                    <div><input id="chk_aliens1im6z" type="checkbox" name="Smart Grid" class="vis-hidden new-post-tags" value="sg" />
+                                                <label for="chk_aliens1im6z">Relationships</label></div>
+                    <div><input id="chk_aliens1im7z" type="checkbox" name="Relationships" class="vis-hidden new-post-tags" value="Relationships" />
+                                                <label for="chk_aliens1im7z">Employment and Work</label></div>
+                    <div><input id="chk_aliens1im8z" type="checkbox" name="Employment and Work" class="vis-hidden new-post-tags" value="Work" />
+                                                <label for="chk_aliens1im8z">Coal</label></div>
+                    <div><input id="chk_aliens1im9z" type="checkbox" name="Environment" class="vis-hidden new-post-tags" value="Environment" />
+                                                <label for="chk_aliens1im9z">Environment</label></div>
+                    <div><input id="chk_aliens1im0z" type="checkbox" name="Ethnicity" class="vis-hidden new-post-tags" value="Ethnicity" />
+                                                <label for="chk_aliens1im0z">Ethnicity</label></div>
+                    <div><input id="chk_aliens1imwz" type="checkbox" name="Soil erosion" class="vis-hidden new-post-tags" value="Soil erosion" />
+                                                <label for="chk_aliens1imwz">Soil erosion</label></div>
+                    <div><input id="chk_aliens1imsz" type="checkbox" name="Fisheries" class="vis-hidden new-post-tags" value="Fisheries" />
+                                                <label for="chk_aliens1imsz">Fisheries</label></div>
+		    <div><input id="chk_aliens1imsz" type="checkbox" name="Forestry" class="vis-hidden new-post-tags" value="Forestry" />
+                                                <label for="chk_aliens1imsz">Forestry</label></div>
+         
+                           </div>
+            </div>
+
+            </div>
+            </form>
+        </div>
+    </body>
+    <html>
+Fisheries

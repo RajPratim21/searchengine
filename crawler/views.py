@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+from django.utils.html import escape
 from datetime import datetime
 from django.shortcuts import render,render_to_response
 from django.template import loader,Context,RequestContext
@@ -95,6 +95,28 @@ es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 db = client.test
 collection = db.docs
 import urlparse
+
+def config(request):
+	return render(
+        request,
+        'crawler/config.html',
+        {
+            'title':'Demo Content',
+            'year': datetime.now().year,
+        }
+    )
+
+def add_config(request):
+	if request.user=="AnonymousUser":
+		return HttpResponseRedirect('/login')
+	print request.user
+	choice=""
+	for key in request.GET:
+		choice=choice+key+","
+	print choice
+	db.config.update_one({"user":str(request.user)},{"$set":{"user":str(request.user),"choice":escape(choice)}}, upsert=True)
+	#import news_personalization
+	return HttpResponseRedirect('/home')
 
 def is_absolute(url):
     return bool(urlparse.urlparse(url).netloc)
@@ -374,33 +396,63 @@ def configuration(request):
 	        request,
 	        'crawler/config.html'
 	    )	
-
+import os
 def news(request):
 	if 1==1:
                 template = loader.get_template('crawler/news.html')
-                response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
-                response = response.json()
+                #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+                #response = response.json()
                 #print response
-                variables = Context({ 'user': request.user ,
-                    'title':'Demo Content',
-                    'year': datetime.now().year,
-                    'feed': response
-                })
-                output = template.render(variables)
+           	if os.path.exists(str(request.user)+'.txt'):
+                        with open(str(request.user)+'.txt') as json_file:
+                                data = json.load(json_file)
+                                variables = Context({ 'user': request.user ,
+                                'title':'Demo Content',
+                                'year': datetime.now().year,
+                                'feed': data
+                             })
+                        output = template.render(variables)
+                else:
+                        with open('newsjson.txt') as json_file:
+                                data = json.load(json_file)
+                                variables = Context({ 'user': request.user ,
+                                'title':'Demo Content',
+                                'year': datetime.now().year,
+                                'feed': data
+                             })
+                        output = template.render(variables)
+
+
 		return HttpResponse(output)
 def home(request):
-	
+	import news_personalization
 	if not request.GET.get('query'):
 		template = loader.get_template('crawler/home.html')
-		response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
-		response = response.json()
+		#response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+		#response = response.json()
 		#print response
-		variables = Context({ 'user': request.user ,
-	            'title':'Demo Content',
-	            'year': datetime.now().year,
-	            'feed': response
-	        })
-		output = template.render(variables)
+		cursor = db.config.find({"user":str(request.user)})
+		for document in cursor:
+			print(document)
+		if os.path.exists(str(request.user)+'.txt'):
+			with open(str(request.user)+'.txt') as json_file:
+                   		data = json.load(json_file)
+		    		variables = Context({ 'user': request.user ,
+	            		'title':'Demo Content',
+	            		'year': datetime.now().year,
+	           		'feed': data
+	        	     })
+			output = template.render(variables)
+		else:
+			with open('newsjson.txt') as json_file:
+                                data = json.load(json_file)
+                                variables = Context({ 'user': request.user ,
+                                'title':'Demo Content',
+                                'year': datetime.now().year,
+                                'feed': data
+                             })
+                        output = template.render(variables)
+
 	else :
 		#print "poppy"
 		x = str(request.GET.get('query')).lower() 
@@ -472,7 +524,7 @@ def home(request):
 					        "multi_match": 
 					        {
 					          "query": request.GET.get('query'),
-					          "fields": [ "data", "header^3" ]
+					          "fields": [ "data", "header^2" ]
 					        # "fuzziness" : "AUTO",
                     		  		#"prefix_length" : 5 
 					        }  
@@ -492,9 +544,10 @@ def home(request):
 									"inline": "if(doc['votes'].value<1){return (_score*params.x)/4  + params.z*doc['votes'].value;}else{return (_score*params.x)/4  + 0.234;}" 
 								}
 
-                                }
+				}                                
 
                             }],
+			
                              "score_mode": "sum"
 				      	     
 				 			
@@ -539,8 +592,11 @@ def home(request):
 			f_res["link"]=rows["_source"]["link"]
 			f_res["theme"]=rows["_source"]["flagindex"]
 			f_res["entity"]= rows["_source"]["entity"][0:8] 
-			if len(rows["_source"]["data"]) >= 500:
-				f_res["data"]=rows["_source"]["data"][:500]+"..."
+			if len(rows["_source"]["data"]) >= 900:
+				if 'techcrunch' in f_res["link"] or 'cnbc' in f_res["link"]:
+					f_res["data"]=rows["_source"]["data"][350:750]+"..."
+				else:
+					f_res["data"]=rows["_source"]["data"][:500]+"..."
 				f_res["header"]= rows["_source"]["header"]
 				f_res["scores"]= rows["_source"]["scores"]
 				f_res["votes"]=  rows["_source"]["votes"]
@@ -554,10 +610,10 @@ def home(request):
 					#print rows["_source"]["img"], rows["_source"]["sum"]
 					#if True:#rows["_source"]["img"][-1]=='p':
 					f_sum["img"]=rows["_source"]["img"]
-					if len(rows["_source"]["sum"])>180:
-						f_sum["text"]=rows["_source"]["sum"][:180]+'...'		
+					if len(f_res["data"])>180:
+						f_sum["text"]=f_res["data"][:180]		
 					else:
-						f_sum["text"]=rows["_source"]["sum"]	
+						f_sum["text"]=f_res["data"]	
 					f_sum["url"]= rows["_source"]["link"]
 					#print rows["_source"]["img"], f_sum["img"], f_sum["text"],rows["_source"]["sum"]
 					#print '$$$$$$',f_sum
@@ -579,10 +635,20 @@ def home(request):
 	            'title':'Demo Content',
 	            'year': datetime.now().year,
 	            'results' : res,
+		    'query': request.GET.get('query'),
 		    'summary':summary
 	        })
 		output = template.render(variables)
 	return HttpResponse(output)
+
+def get_suggestion(request):
+	if not request.GET.get('query'):
+		return HttpResponse("null");
+	else:
+		urla='http://suggestqueries.google.com/complete/search?client=firefox&q='+urllib.quote_plus(request.GET.get('query'));
+		print urla
+		response = urllib2.urlopen(urla).read()
+		return HttpResponse(response);
 
 def logout_page(request):
     logout(request)

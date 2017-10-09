@@ -3,28 +3,52 @@
 {% load staticfiles %}
 
 {% if user.is_authenticated and user.username %}
+<div align="center" id="google_translate_element"></div>
 
-        <div class="container">
-        <div class="row">
-      <div class="table-hover" style="margin-top: 30px">
-                {% for row in feed.articles %}
+
+
+            <script type="text/javascript">
+
+            function googleTranslateElementInit() {
+
+              new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+
+            }
+
+            </script>
+
+            <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+
+            </script>
+	<br/>
+        <div class="container" >
+			 {% for row in feed.articles %}
                     <div class="col-md-4 col-xs-12 scard pull-right">
+
                         <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
                               <div class="card small">
                                 <div class="card-image">
-                                  <img src="{{row.urlToImage}}">
+                                  <img src="{{row.image}}">
                                 </div>
                                 <div class="card-content">
-                                  <p ><b>{{row.title}}</b></p>
+                               <div class="category definition"  style="padding: 3px 7px !important;font-size: 13px !important;
+                        background-color: #0007ff;font-weight: bold;text-shadow: 1px 1px black;color: #ffffff;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid black;cursor: pointer;
+                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;"> <p><b> {{row.Category}}</b></p></div>
+
+
+                                 <p ><b>{{row.title}}</b></p>
                                 </div>
-                                
+
                               </div>
                          </div>
                         <br/>
-                    </div> 
-                 
-                {% endfor %}
-            
+                    </div>
+
+                {% endfor %}>
+        <div class="row">
+      <div class="table-hover" style="margin-top: 30px">
+           
     </div>
 
     <br/>
