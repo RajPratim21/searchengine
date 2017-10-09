@@ -61,7 +61,7 @@ args = vars(ap.parse_args())
 domain = args['domain']
 
 # list of available indices
-index_list = ["2017-34","2017-09","2017-13","2017-17","2017-22","2017-26","2017-30"]
+index_list = ["2017-39","2017-34","2017-09","2017-13","2017-17","2017-22","2017-26","2017-30"]
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 stop_words = set(stopwords.words('english'))
 
@@ -477,7 +477,7 @@ def extract_external_links(html_content,link_list, mainurl):
 #record_list = search_domain(domain)
 #link_list   = []
 
-domain_list= ["techcrunch.com","abc-news-au.com","al-jazeera-english.com","ars-technica.com","associated-press.com","bbc-news.com","bbc-sport.com","bild.com","bloomberg.com","breitbart-news.com","business-insider.com","business-insider-uk.com","buzzfeed.com","cnbc.com","cnn.com","daily-mail.com","der-tagesspiegel.com","die-zeit.com","engadget.com","entertainment-weekly.com","espn-cric-info.com","espn.com","financial-times.com","football-italia.com","focus.com","four-four-two.com","fortune.com","fox-sports.com","google-news.com","gruenderszene.com","hacker-news.com","handelsblatt.com","ign.com","independent.com","mashable.com","metro.com","mirror.com","mtv-news.com","mtv-news-uk.com","national-geographic.com","new-scientist.com","newsweek.com","new-york-magazine.com","polygon.com","recode.com","reddit-r-all.com","reuters.com","spiegel-online.com","t3n.com","talksport.com","techradar.com","the-economist.com","the-guardian-au.com","the-guardian-uk.com","the-hindu.com","the-huffington-post.com","the-lad-bible.com","the-new-york-times.com","the-next-web.com","the-sport-bible.com","the-telegraph.com","the-verge.com","the-wall-street-journal.com","the-washington-post.com","usa-today.com","time.com","wired-de.com","wirtschafts-woche.com"]
+domain_list= ["cnn.com", "bbc.com","wsj.com" "techcrunch.com","abc-news-au.com","al-jazeera-english.com","ars-technica.com","associated-press.com","bbc-news.com","bbc-sport.com","bild.com","bloomberg.com","breitbart-news.com","business-insider.com","business-insider-uk.com","buzzfeed.com","cnbc.com","cnn.com","daily-mail.com","der-tagesspiegel.com","die-zeit.com","engadget.com","entertainment-weekly.com","espn-cric-info.com","espn.com","financial-times.com","football-italia.com","focus.com","four-four-two.com","fortune.com","fox-sports.com","google-news.com","gruenderszene.com","hacker-news.com","handelsblatt.com","ign.com","independent.com","mashable.com","metro.com","mirror.com","mtv-news.com","mtv-news-uk.com","national-geographic.com","new-scientist.com","newsweek.com","new-york-magazine.com","polygon.com","recode.com","reddit-r-all.com","reuters.com","spiegel-online.com","t3n.com","talksport.com","techradar.com","the-economist.com","the-guardian-au.com","the-guardian-uk.com","the-hindu.com","the-huffington-post.com","the-lad-bible.com","the-new-york-times.com","the-next-web.com","the-sport-bible.com","the-telegraph.com","the-verge.com","the-wall-street-journal.com","the-washington-post.com","usa-today.com","time.com","wired-de.com","wirtschafts-woche.com"]
 
 #for domain in domain_list:
 #	record_list = search_domain(domain)
@@ -495,7 +495,7 @@ for record in record_list:
     link_list = extract_external_links(html_content,link_list, record['url'])
     
 print "[*] Total external links discovered: %d" % len(link_list)
-
+'''
 with codecs.open("%s-links.csv" % domain,"wb",encoding="utf-8", errors='ignore') as output:
 
     fields = ["URL"]
@@ -506,4 +506,4 @@ with codecs.open("%s-links.csv" % domain,"wb",encoding="utf-8", errors='ignore')
     for link in link_list:
         logger.writerow({"URL":link})
 
-
+'''

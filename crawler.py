@@ -130,7 +130,7 @@ def find_internal_urlswiki(lufthansa_url, depth=0, max_depth=500):
         print 'ide count',counter_ide
         counter_ide = counter_ide+1
         if counter_ide==1000:
-           	return {}
+           	print 'cazz'
         for a_tag in a_tags:
             if "http" not in a_tag["href"] and "/" in a_tag["href"]:
                 url = lufthansa_url + a_tag['href']
@@ -637,7 +637,7 @@ def driverwiki(url):
 
 
 
-driverwiki("https://en.wikipedia.org/wiki/Category:Companies")
+driverwiki("https://en.wikipedia.org/wiki/Main_Page")
 counter_ide=0
 driverwiki("https://en.wikipedia.org/wiki/Lists_of_celebrities")   
 counter_ide=0
