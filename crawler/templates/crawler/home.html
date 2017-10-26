@@ -1,10 +1,185 @@
 {% extends "crawler/customuser.html" %}
+
 {% block content %}
 {% load staticfiles %}
 
 {% if user.is_authenticated and user.username %}
+<script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
+<style>
 
-        <div class="container">
+.scard .imgs {
+  transform: scaleY(1);
+  transition: all .7s ease-in-out;
+  border:5px;
+  border-radius:10px:
+}
+
+.scard .mask {
+  transition: all 0.5s linear;
+  text-align:center;
+  opacity:0;
+  padding:5px;
+}
+
+.scard h2 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  background: transparent;
+  margin: 20px 40px 0px 40px;
+  transform: scale(0);
+  color: #333;
+  transition: all 0.5s linear;
+  opacity: 0;
+}
+
+.scard #just {
+  color: #333;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.5s linear;
+  padding:10px;
+}
+
+.scard a.info {
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.5s linear;
+}
+
+.scard:hover .imgs {
+  -webkit-transform: scale(10);
+  transform: scale(10);
+  opacity:0;
+}
+.scard:hover .card-content {
+  -webkit-transform: scale(10);
+  transform: scale(10);
+  display:none;
+}
+
+.scard:hover .mask {
+  opacity:1;
+  top:0px;
+  position:absolute;
+  z-index:999;
+}
+
+.scard:hover h2,
+.scard:hover #just,
+.scard:hover a.info {
+  transform: scale(1);
+  opacity: 1;
+}
+.mask .glyphicon:hover{
+color:grey;
+}
+.mask a:hover{
+text-decoration:none;
+}
+.alink:hover{
+text-decoration:underline;
+}
+.scard:hover {
+  transform:scale(1.2);
+
+}
+
+/* drop down menu */
+
+div 
+{
+    font-family: Arial, Verdana;
+    font-size: 14px;
+    margin: 0 ;
+    padding: 0;
+    list-style: none;
+    border: 10px;
+    border-radius: 10px;
+}
+
+div select 
+{
+    text-decoration: none;
+    color: #ffffff;
+    padding: 5px 15px 5px 15px;
+    background: #2C5463;
+    border: 10px;
+    border-radius: 10px;
+}
+
+div select :hover 
+{
+    background: #617F8A;
+}
+
+
+select :hover  
+{
+    background: #617F8A;
+}
+
+option:hover 
+{
+    background: #95A9B1;
+}
+/* drop down menu */
+
+.navbar{
+margin-bottom:0px !important;
+/*background-color:#301d1d;*/
+background-color:#000066;
+/*background-color:#1e88e5;*/
+}
+.navside b,.navside span{
+color:white;
+}
+ul strong{
+color:white;
+font-size:18px;
+margin-top:25px;
+margin-left:10px;
+}
+ul li{
+margin-bottom:5px;
+}
+.card{
+margin:0px !important;
+overflow:hidden;
+}
+</style>
+{% load get %}
+<div id="ubuntubar" style="overflow:scroll;direction:rtl;float:left;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
+<ul style="direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+
+{% for key,value in options.items %}
+<li style="display:inline-flex;" class="personalize"><img src='{{value}}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+{% endfor %}
+</ul>
+</div>
+<script>
+$("#ubuntubar").parent().removeClass('container');
+$("#ubuntubar").hover(function(){
+$("#ubuntubar").css("width","350px");
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar").css("width","100px");
+$('.scard').css('z-index','0');
+});
+$("li").hover(function(){
+$(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
+$(this).find('strong').show();
+$(this).css('cursor','pointer');
+},function(){
+$(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
+$(this).find('strong').hide();
+});
+$("li").click(function(){
+var url=document.location.href.split("/")[0];
+var theme=$(this).find('strong').html();
+window.location.href="http://13.90.154.164:8000/news?theme="+theme;
+});
+</script>
+<div style="margin-left:100px;margin-top:60px;">
+        <div class="container" style="margin-top:20px;">
         <div class="row">
             <div class="col-md-6 col-md-offset-3" style="text-align: center">
                 <img src='{% static "crawler/media/exaro.png" %}' style="margin-top: 20px"/>
@@ -73,7 +248,6 @@
             </form>
             </div>
         </div>
-    </div>
      <div align="center" id="google_translate_element"></div>
 
             <script type="text/javascript">
@@ -89,40 +263,101 @@
              <img src='{% static "crawler/media/cortexlogiclogo.jpg" %}' width="200"  height ="80"/></p>
     </div>
 
-      <div class="table-hover" style="margin-top: 30px">
-                {% for row in feed.articles %}
+<!--<div class="container">
+<b>&nbspMy prioritized configurations</b>
+<div style="overflow:scroll;height:150px;width:100%;margin:5px;border:2px solid blue;">
+<table id="prioritytable" style="margin:5px;width:99%;height:93%;" align="center">
+<tr id="noselect" align="center">
+<td style="border:0px;background:white;"><b>No Entries Yet</b></td>
+</tr>
+<tr><td style="" align="center"><b>Business</b></td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">E-Commerce</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">finance</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Auditing</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Real Estate</td></tr><tr><td style="" align="center"><b>Sports</b></td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Golf</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Baseball</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Basketball</td></tr><tr><td><b>Technology</b></td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Artificial Intelligence</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Internet Things</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Biotechnology</td></tr><tr><td><b>Energy</b></td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Smart Grid</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Mining</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Wind energy</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Nuclear Energy</td></tr><tr><td><b>Miscellaneous</b></td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Military</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Philosophy</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Politics</td><td draggable="true" ondrop="drop_handler(event);" ondragend="dragend_handler(event);" ondragover="dragover_handler(event);" ondragstart="dragstart_handler(event);">Relationships</td></tr>
+
+</table>
+</div>
+</div>-->
+
+      <div class="table-hover" style="margin-top:30px;">
+            {% for row in feed.articles %}
                     <div class="col-md-4 col-xs-12 scard pull-right">
-                        <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
-                              <div class="card small">
-                                <div class="card-image">
-                                  <img src="{{row.image}}">
+
+                        <div class="rowarticle">
+                              <div class="card small" style="border: 5px #FFFF00;border-radius:10px;">
+                                <div class="card-image"style="border: 5px #FFFF00;border-radius:10px;">
+                                  <img class="imgs" src="{{row.img}}">
                                 </div>
-                                <div class="card-content">
-                               <div class="category definition"  style="padding: 3px 7px !important;font-size: 13px !important;
-                        background-color: #0007ff;font-weight: bold;text-shadow: 1px 1px black;color: #ffffff;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid black;cursor: pointer;
-                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;"> <p><b> {{row.Category}}</b></p></div>
-                        
-         
-				 <p ><b>{{row.title}}</b></p>
+                                <div class="card-content" style="height:100%;">
+                                 <p ><b>{{row.header}}</b></p>
                                 </div>
-                                
-                              </div>
-                         </div>
+			<div class="mask">
+			<img src="{{row.img}}" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span>
+      <a href='{{row.link}}' target="_blank"><h4 class="alink">{{row.header}}</h4>
+      <p id="just">{{row.data|trim|truncatechars:500}}</p>
+    </div>
+                              </div></a></div>
                         <br/>
-                    </div> 
-                 
-                {% endfor %}
+                    </div>
+
+                {% endfor %}>
             
     </div>
 
     <br/>
+	<hr>
+	<div class="container" style="text-align:center;margin-bottom:20px;">
+	
+	<button id="prevbtn" {% if page|add:'-1' < 1 %}disabled {% endif %}class="btn btn-info"><a style="text-decoration:none;color:white;" id="prevpage" href="/news?theme=News%20and%20Media&page={{page|add:'-1'}}">Previous Page</a></button>
+	<button id="nextbtn" {% if page|add:'1' > maxpage %}disabled {% endif %}class="btn btn-success"><a style="text-decoration:none;color:white;" id="nextpage" href="/news?theme=News%20and%20Media&page={{page|add:'1'}}">Next Page</a></button>
+	</div>
+	<div id="loadingimage" style="display:none;position:fixed;top:0px;bottom:0px;right:0px;left:0px;background:white;"><img style="margin:auto;" src="{% static 'crawler/media/Preloader_1.gif' %}"/></div>
+	</div>
     {% else %}
-        <p>Welcome anonymous user!
+        <p style="margin-top:100px;">Welcome anonymous user!
             You need to <a href="/login/">login</a></p>
     {% endif %}
+<script>
+$('.mask .glyphicon').click(function(){
+if($(this).css('color')=='rgb(255, 0, 0)'){
+$(this).css('color','black');
+}
+else{
+$(this).css('color','red');
+}
+// write custom function for onclick addition to db
+});
+$('.mask .glyphicon').hover(function(){
+if($(this).css('color')!='rgb(255, 0, 0)'){
+$(this).css('color','grey');
+}
+},function(){
+if($(this).css('color')=='rgb(128, 128, 128)'){
+$(this).css('color','black');
+}
+});
+function abcd(){
+$('.mask .glyphicon').click(function(){
+if($(this).css('color')=='rgb(255, 0, 0)'){
+$(this).css('color','black');
+}
+else{
+$(this).css('color','red');
+}
+// write custom function for onclick addition to db
+});
+}
+$('.scard').hover(function(){
+$('.scard').not(this).css('-webkit-filter','brightness(50%)');
+$(this).find('.mask').css('transition','all 0.5s linear');
+$(this).find('.imgs').css({'-webkit-transform':'scale(5)','transform':'scale(10)','opacity':'0'});
+$(this).find('.card-content').css({'-webkit-transform':'scale(10)','transform':'scale(10)','display':'none'});
 
+},function(){
+$('.scard').css('-webkit-filter','brightness(100%)');
+$(this).find('.mask').css('transition','all 0s linear');
+$(this).find('.imgs').css({'-webkit-transform':'scale(1)','transform':'scaleY(1)','opacity':'1'});
+$(this).find('.card-content').css({'-webkit-transform':'scale(1)','transform':'scale(1)','display':'block'});
 
+});
+</script>
 {% endblock %}
 
 

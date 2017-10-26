@@ -1,9 +1,199 @@
 {% extends "crawler/customuser.html" %}
 {% block content %}
 {% load staticfiles %}
+<style>
+body{
+background-color:#1e88e5;
+/*background-color:#e2cfcf;*/
+}
+.scard .imgs {
+  transform: scaleY(1);
+  transition: all .7s ease-in-out;
+  border:5px;
+  border-radius:10px:
+}
 
+.scard .mask {
+  transition: all 0.5s linear;
+  text-align:center;
+  opacity:0;
+  padding:5px;
+}
+
+/* drop down style
+ul
+{
+    font-family: Arial, Verdana;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+ul li
+{
+    display: block;
+    position: relative;
+    float: left;
+}
+
+li ul
+{
+    display: none;
+}
+
+ul li a 
+{
+    display: block;
+    text-decoration: none;
+    color: #ffffff;
+    border-top: 1px solid #ffffff;
+    padding: 5px 15px 5px 15px;
+    background: #2C5463;
+    margin-left: 1px;
+    white-space: nowrap;
+}
+
+ul li a:hover 
+{
+    background: #617F8A;
+}
+li:hover ul 
+{
+    display: block;
+    position: absolute;
+}
+
+li:hover li
+{
+    float: none;
+    font-size: 11px;
+}
+
+li:hover a 
+{
+    background: #617F8A;
+}
+
+li:hover li a:hover 
+{
+    background: #95A9B1;
+}
+   drop down style */
+.scard h2 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  background: transparent;
+  margin: 20px 40px 0px 40px;
+  transform: scale(0);
+  color: #333;
+  transition: all 0.5s linear;
+  opacity:0;
+
+}
+
+.scard #just {
+  color: #333;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.5s linear;
+  padding:10px;
+}
+
+.scard a.info {
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.5s linear;
+}
+
+.scard:hover .imgs {
+  -webkit-transform: scale(5);
+  transform: scale(10);
+  opacity:0;
+}
+.scard:hover .card-content {
+  -webkit-transform: scale(10);
+  transform: scale(10);
+  display:none;
+}
+
+.scard:hover .mask {
+  opacity:1;
+  top:0px;
+  position:absolute;
+  z-index:999;
+}
+
+.scard:hover h2,
+.scard:hover #just,
+.scard:hover a.info {
+  transform: scale(1);
+  opacity: 1;
+}
+.mask .glyphicon:hover{
+color:grey;
+}
+.mask a:hover{
+text-decoration:none;
+}
+.alink:hover{
+text-decoration:underline;
+}
+.scard:hover {
+  transform:scale(1.2);
+}
+.navbar{
+margin-bottom:0px !important;
+/*background-color:#1e88e5;*/
+background-color:#000066;
+/*background-color:#301d1d;*/
+}
+.navside b,.navside span{
+color:white;
+}
+ul strong{
+color:white;
+font-size:18px;
+margin-top:25px;
+margin-left:10px;
+}
+ul li{
+margin-bottom:5px;
+}
+.card{
+margin:0px !important;
+overflow:hidden;
+}
+
+</style>
+{% load get %}
 {% if user.is_authenticated and user.username %}
-<div align="center" id="google_translate_element"></div>
+<div id="ubuntubar" style="overflow:scroll;direction:rtl;float:left;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
+<ul style="direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+
+{% for key,value in options.items %}
+<li style="display:inline-flex;" class="personalize"><img src='{{value}}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+{% endfor %}
+</ul>
+</div>
+<script>
+$("#ubuntubar").hover(function(){
+$("#ubuntubar").css("width","350px");
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar").css("width","100px");
+$('.scard').css('z-index','0');
+});
+$("li").hover(function(){
+$(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
+$(this).find('strong').show();
+$(this).css('cursor','pointer');
+},function(){
+$(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
+$(this).find('strong').hide();
+});
+</script>
+<div style="margin-left:100px;">
+<div align="center" style="margin-top:60px;" id="google_translate_element"></div>
 
 
 
@@ -21,42 +211,176 @@
 
             </script>
 	<br/>
-        <div class="container" >
+    <div class="container" id="personalizenews">
+
 			 {% for row in feed.articles %}
                     <div class="col-md-4 col-xs-12 scard pull-right">
 
-                        <div class="rowarticle" onclick="window.location.href='{{row.url}}';">
-                              <div class="card small">
-                                <div class="card-image">
-                                  <img src="{{row.image}}">
+                        <div class="rowarticle">
+                              <div class="card small" style="border: 5px #FFFF00;border-radius:10px;">
+                                <div class="card-image"style="border: 5px #FFFF00;border-radius:10px;">
+                                  <img class="imgs" src="{{row.img}}">
                                 </div>
-                                <div class="card-content">
-                               <div class="category definition"  style="padding: 3px 7px !important;font-size: 13px !important;
-                        background-color: #0007ff;font-weight: bold;text-shadow: 1px 1px black;color: #ffffff;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;border: 1px solid black;cursor: pointer;
-                        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-                        -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;"> <p><b> {{row.Category}}</b></p></div>
-
-
-                                 <p ><b>{{row.title}}</b></p>
+                                <div class="card-content" style="height:100%;">
+                                 <p ><b>{{row.header}}</b></p>
                                 </div>
-
-                              </div>
-                         </div>
+			<div class="mask">
+			<img src="{{row.img}}" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span>
+      <a href='{{row.link}}' target="_blank"><h4 class="alink">{{row.header}}</h4>
+      <p id="just">{{row.data|trim|truncatechars:500}}</p>
+    </div>
+                              </div></a></div>
                         <br/>
                     </div>
 
                 {% endfor %}>
-        <div class="row">
-      <div class="table-hover" style="margin-top: 30px">
-           
-    </div>
 
+</div>
     <br/>
+	<hr>
+	<div class="container" style="text-align:center;margin-bottom:20px;">
+	
+	<button id="prevbtn" {% if page|add:'-1' < 1 %}disabled {% endif %}class="btn btn-info"><a style="text-decoration:none;color:white;" id="prevpage" href="/news?page={{page|add:'-1'}}&theme={{selectedcat}}">Previous Page</a></button>
+	<button id="nextbtn" {% if page|add:'1' > maxpage %}disabled {% endif %}class="btn btn-success"><a style="text-decoration:none;color:white;" id="nextpage" href="/news?page={{page|add:'1'}}&theme={{selectedcat}}">Next Page</a></button>
+	</div>
+	<div id="loadingimage" style="display:none;position:fixed;top:0px;bottom:0px;right:0px;left:0px;background:white;"><img style="margin:auto;" src="{% static 'crawler/media/Preloader_1.gif' %}"/></div>
+	</div>
     {% else %}
-        <p>Welcome anonymous user!
-            You need to <a href="/login/">login</a></p>
+        <p style="margin-top:100px;color:white;">Welcome anonymous user!
+            You need to <a style="color:yellow" href="/login/">login</a></p>
     {% endif %}
+	
+<script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
+<script>
+$('.mask .glyphicon').click(function(){
+if($(this).css('color')=='rgb(255, 0, 0)'){
+$(this).css('color','black');
+}
+else{
+$(this).css('color','red');
+}
+// write custom function for onclick addition to db
+});
+$('.mask .glyphicon').hover(function(){
+if($(this).css('color')!='rgb(255, 0, 0)'){
+$(this).css('color','grey');
+}
+},function(){
+if($(this).css('color')=='rgb(128, 128, 128)'){
+$(this).css('color','black');
+}
+});
+function abcd(){
+$('.mask .glyphicon').click(function(){
+if($(this).css('color')=='rgb(255, 0, 0)'){
+$(this).css('color','black');
+}
+else{
+$(this).css('color','red');
+}
+// write custom function for onclick addition to db
+});
+}
+$('.scard').hover(function(){
+$('.scard').not(this).css('-webkit-filter','brightness(50%)');
+$(this).find('.mask').css('transition','all 0.5s linear');
+$(this).find('.imgs').css({'-webkit-transform':'scale(5)','transform':'scale(10)','opacity':'0'});
+$(this).find('.card-content').css({'-webkit-transform':'scale(10)','transform':'scale(10)','display':'none'});
 
+},function(){
+$('.scard').css('-webkit-filter','brightness(100%)');
+$(this).find('.mask').css('transition','all 0s linear');
+$(this).find('.imgs').css({'-webkit-transform':'scale(1)','transform':'scaleY(1)','opacity':'1'});
+$(this).find('.card-content').css({'-webkit-transform':'scale(1)','transform':'scale(1)','display':'block'});
+
+});
+/*$(function() {  
+    $("#ubuntubar").niceScroll({cursorcolor:"#00F",cursoropacitymin: 0.5,autohidemode: false,cursordragontouch: true,cursorwidth: "10px",railalign:"left"});
+	$("#ascrail2000").hover(function(){
+		$("#ubuntubar").trigger('hover');
+	});
+});*/
+var page=1;
+var currentquery="";
+var jsobject="";
+var maxpage=5;
+$(".personalize").click(function(){
+jsobject=$(this);
+$(".selectedcat").css('border','2px solid white');
+$(".selectedcat").removeClass('selectedcat');
+$(this).find('img').addClass('selectedcat');
+$(this).find('img').css('border','4px solid yellow');
+$(this).find('img').css('margin-left','0px');
+						var query=$(this).find("strong").html();
+                        var url = "/news?query="+query+"&page="+page;
+                        var jsonFile = new XMLHttpRequest();
+						$("body").css({'background':'white','z-index':'-1'});
+						$("#loadingimage").css('display','flex');
+						jsonFile.open("GET",url,true);
+                        jsonFile.send();
+                        jsonFile.onreadystatechange = function(){
+                            if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+							console.log("gotit");
+				var resp=JSON.parse(jsonFile.responseText);
+                                var news = '';
+				if(resp){
+                                /*for(var i = 0; i < resp["result"].length; i++)
+                                    options +=resp["result"][i];
+                                document.getElementById('personalizenews').innerHTML = options;*/
+								var c=0;
+								maxpage=resp["maxpage"];
+								for(var i in resp["articles"]){
+								/*for(var row in resp["articles"][i]){*/
+								/*if(c==0){console.log(row);c=2;}*/
+									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
+									news+=markup;
+									}
+								document.getElementById('personalizenews').innerHTML = news;
+								currentquery=query;
+								page=resp["page"];
+								var url=document.location.href.split("?")[0];
+								window.history.pushState('',document.titile,url);
+								$('#nextpage').attr('href','#page='+(page+1).toString());
+								
+								$('#nextpage').attr('onclick',"nextpagefunc()");
+								
+								$('#prevpage').attr('href','#page='+(page-1).toString());
+								
+								$('#prevpage').attr('onclick',"prevpagefunction()");
+								
+								abcd();
+							}
+							$("body").css({'background':'#1e88e5','z-index':'0'});
+							$("#loadingimage").hide();
+			}
+                         }
+});
+function nextpagefunc(){
+	page+=1;
+	if(page>maxpage){
+		$("#nextbtn").prop('disabled',true);
+		page=maxpage;
+		}
+	else{
+		$("#prevbtn").prop("disabled",false);
+		var url=document.location.href.split("?")[0];
+		window.history.pushState('',document.titile,url);
+		jsobject.trigger('click');
+		}
+	}
+function prevpagefunction(){
+	page-=1;
+	if(page<1){
+		$("#prevbtn").prop('disabled',true);
+		page=1;
+		}
+	else{
+		jsobject.trigger('click');
+		$("#nextbtn").prop('disabled',false);
+		}
+	}
+								
+</script>
 
 {% endblock %}
 

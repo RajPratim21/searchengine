@@ -19,20 +19,25 @@
 			  padding: 5px;
 			}
 
-			input:focus + label {
-			  background-color: white;
-			}
-
 			input:checked + label {
-			  background-color: rgb(240,240,240);
+			  background: repeating-linear-gradient(-45deg, grey, silver 5px, grey 5px, silver 10px);
+			  color:white;
+			  -webkit-touch-callout: none;
+			  -webkit-user-select: none;
+			  -khtml-user-select: none;
+			  -moz-user-select: none;
+			  -ms-user-select: none;
+			  user-select: none;
 			}
             
             body{
                 font-family: sans-serif;
-            }
+				
+		background-color:#1e88e5;           
+ }
             .main{
-                border: 2px solid black;
-                border-radius: 30px;
+                //border: 2px solid black;
+                //border-radius: 30px;
                 margin: 10px;
                 padding: 20px;
             }
@@ -49,6 +54,7 @@
                 margin: 0 0.5% 20px 0.5%;
                 font-weight: bold;
                 box-shadow: 0px 0px 5px lightgrey;
+		cursor:pointer;
             }
 			
 			button{
@@ -64,24 +70,29 @@
                 display: inline-block;
             }
             .leftSideBar{
+				display:none;
                 float: left;
                 width: 20%;
                 text-align: center;
                 font-weight: bold;
                 margin-left: 0.5%; 
+		margin-top:5px;
+		margin-right:5px;
+		border-radius:10px;
             }
             .leftSideBar div{
-                float: left;
                 background-color: rgb(223,235,247);
                 padding: 10px;
                 position: relative;
             }
             .rightSideBar{
-                width: 79%;
+		background-color:ghostwhite;
+		margin-top:5px;
+		margin-bottom:5px;
+		border-radius:10px;
             }
             .rightSideBar div{
                 display: inline-block;
-                width: 24%;
                 text-align: center;
                 margin: 5px;
                 font-size: 18px;
@@ -96,223 +107,301 @@
                     width: 100%;
                 }
             }
+	    .wrapit{
+		border:2px solid;
+		border-radius:10px;
+		box-shadow:10px 10px 5px #888888;
+		background:blueviolet;
+		text-align:center;
+	    }
+	    th,td{
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		border:1px solid black;
+		border-radius:5px;
+		background:yellowgreen;
+		text-align:center;
+		cursor:pointer;
+	    }
+		.duplicate{
+		text-align:center;
+		padding:10px;
+		margin:5px;
+		background:#000066;
+		font-weight:900;
+		color:white;
+		cursor:pointer;
+		}
+		.duplicate:hover{
+		background:yellowgreen!important;
+		color:honeydew!important;
+		}
         </style>
+	{% load staticfiles %}
+	{% load get %}
     </head>
     <body>
-        <div class="main">
+	<div>
+<div style="float:left;width:300px;position:fixed;height:100%;background:#000066;">
+<form>
+<div class="options" align="center">
+<div align="center" style="min-width:80%;margin-top:20px;background:#000066;border-radius:10px;border:white;padding:10px;">
+<strong align="center" style="color:white;"><b>Choose Themes</b></strong><br><br>
+<input type="text" placeholder="Search for a theme !!" style="min-width:50%;" autocomplete="off" list="suggest" id="searchtext" name="query">
+<datalist id="suggest">
+
+</datalist>
+</div>
+</div>
+<div style="overflow:scroll;height:100%;position:absolute;">
+{% for key,value in categories.items %}
+<div class="duplicate" value="{{key|cut:' '}}" id="dup_{{key|cut:' '}}" style="display:block;">{{key}}</div>
+{% endfor %}
+</div>
+</form>
+</div>
+	<div class="main" style="margin-left:300px;">
             <h2>Configuration</h2>
-			<form action="./add_config" method="get">
-            <div class="options">
-                <div>Add Search Themes</div>
-                <div>Add Keywords</div>
-                <div>Keyword Suggestions</div>  
-				<button type="submit" value="Submit">Submit</button>  
+<div>
+<b>&nbspMy prioritized configurations</b>
+<div style="overflow:scroll;height:150px;width:100%;margin-right:10px;margin-top:5px;border-radius:10px;box-shadow:10px 10px 5px #888888;background:white;">
+<table id="prioritytable" style="margin:5px;width:99%;height:93%;" align="center">
+<tr id="noselect" align="center">
+<td style="border:0px;background:white;"><b>No Entries Yet</b></td>
+</tr>
+</table>
+</div>
+</div>
+
+			<form action="./add_config" method="post" id="mainform">
+            <div class="options" align="center" style="margin-top:20px;">
+  <div style="background:burlywood;display:none;"><input type="text" id="addtheme" list="suggestMore" autocomplete="off" name="query"> <datalist id="suggestMore">
+                                </datalist>
+
+<div style="display:none;">Add Theme</div></div>
+                <div id="adder" style="background:burlywood;">Add selection to my prioritized configuration</div>
+				<input type="hidden" name="priorities" id="hiddendata"/>
+				<button type="submit" value="Submit" onclick="sendpriorities()">Submit</button>
+				{% csrf_token %}
             </div>
-            <div class="wrapper">
-                <div class="leftSideBar">
-                    <div>Business</div>
+			{% for key,value in categories.items %}
+			<div class="wrapper">
+			<div id="cat_{{key|cut:' '}}" value="{{key}}" style="display:none;" class="wrapit">
+			<div class="leftSideBar">
+                    <div>{{key}}</div>
                 </div>
-                <div class="rightSideBar">
-                   <div><input id="chk_aliens1vv" type="checkbox" name="Business" class="vis-hidden new-post-tags" value="Business" />
-                                                <label for="chk_aliens1vv">Business</label></div>
-
-		    <div><input id="chk_aliens1" type="checkbox" name="E-Commerce" class="vis-hidden new-post-tags" value="E-Commerce" />
-						<label for="chk_aliens1">E-Commerce</label></div>
-                    <div><input id="chk_aliens2" type="checkbox" name="Electronics" class="vis-hidden new-post-tags" value="Electronics" />
-						<label for="chk_aliens2">Electronics</label></div>
-                    <div><input id="chk_aliens3" type="checkbox" name="finance" class="vis-hidden new-post-tags" value="finance" />
-						<label for="chk_aliens3">finance</label></div>
-                    <div><input id="chk_aliens4" type="checkbox" name="Auditing" class="vis-hidden new-post-tags" value="Auditing" />
-						<label for="chk_aliens4">Auditing</label></div>
-                    <div><input id="chk_aliens5" type="checkbox" name="Banking" class="vis-hidden new-post-tags" value="Banking" />
-						<label for="chk_aliens5">Banking</label></div>
-                    <div><input id="chk_aliens6" type="checkbox" name="Insurance" class="vis-hidden new-post-tags" value="Insurance" />
-						<label for="chk_aliens6">Insurance</label></div>
-                    <div><input id="chk_aliens7" type="checkbox" name="Magazines" class="vis-hidden new-post-tags" value="Magazines" />
-						<label for="chk_aliens7">Magazines</label></div>
-                    <div><input id="chk_aliens8" type="checkbox" name="Real Estate" class="vis-hidden new-post-tags" value="Real Estate" />
-						<label for="chk_aliens8">Real Estate</label></div>
-                    <div><input id="chk_aliens9" type="checkbox" name="Investment" class="vis-hidden new-post-tags" value="Investment" />
-						<label for="chk_aliens9">Investment</label></div>
-                    <div><input id="chk_aliens0" type="checkbox" name="Manufacturing" class="vis-hidden new-post-tags" value="Manufacturing" />
-						<label for="chk_aliens0">Manufacturing</label></div>
-                    <div><input id="chk_aliensa" type="checkbox" name="Security" class="vis-hidden new-post-tags" value="Security" />
-						<label for="chk_aliensa">Security</label></div>
-                    <div><input id="chk_aliensb" type="checkbox" name="Small_Business" class="vis-hidden new-post-tags" value="Small_Business" />
-						<label for="chk_aliensb">Small Business</label></div>
-                    <div><input id="chk_aliensn" type="checkbox" name="Marketing" class="vis-hidden new-post-tags" value="Marketing" />
-						<label for="chk_aliensn">Marketing</label></div>
-                    <div><input id="chk_aliensc" type="checkbox" name="Advertising" class="vis-hidden new-post-tags" value="Advertising" />
-						<label for="chk_aliensc">Advertising</label></div>
-                    <div><input id="chk_aliensd" type="checkbox" name="Taxation" class="vis-hidden new-post-tags" value="Taxation" />
-						<label for="chk_aliensd">Taxation</label></div>
-                                    </div>
+			<div class="rightSideBar">
+			{% for j in value %}
+                   <div><img src='{{subcategoryimg|get:key|get:j}}' width='100px' height='100px' alt='{{ subcategoryimg.key }}'><br><input id="cat_{{key|cut:' '}}_{{j|cut:' '}}" type="checkbox" name="cat_{{key|cut:' '}}_{{j|cut:' '}}" class="vis-hidden new-post-tags" value="{{key}}__{{j}}" />
+                                                <label for="cat_{{key|cut:' '}}_{{j|cut:' '}}">{{j}}</label></div>
+			{% endfor %}
+			</div>
+			</div>
             </div>
-            <div class="border"></div>
-            <div class="wrapper">
-                <div class="leftSideBar">
-                    <div>Sports</div>
-                </div>
-                 <div class="rightSideBar">
-                   <div><input id="chk_aliens1vv" type="checkbox" name="Sports" class="vis-hidden new-post-tags" value="Sports" />
-                                                <label for="chk_aliens1vv">Sports</label></div>
-
-		    <div><input id="chk_aliens1aa" type="checkbox" name="Cricket" class="vis-hidden new-post-tags" value="Cricket" />
-						<label for="chk_aliens1aa">Cricket</label></div>
-                    <div><input id="chk_aliens1da" type="checkbox" name="Football" class="vis-hidden new-post-tags" value="Football" />
-						<label for="chk_aliens1da">Football</label></div>
-                    <div><input id="chk_aliens1s" type="checkbox" name="Golf" class="vis-hidden new-post-tags" value="Golf" />
-						<label for="chk_aliens1s">Golf</label></div>
-                    <div><input id="chk_aliens1c" type="checkbox" name="Gymnastics" class="vis-hidden new-post-tags" value="Gymnastics" />
-						<label for="chk_aliens1c">Gymnastics</label></div>
-                    <div><input id="chk_aliens1x" type="checkbox" name="Hockey" class="vis-hidden new-post-tags" value="Hockey" />
-						<label for="chk_aliens1x">Hockey</label></div>
-                    <div><input id="chk_aliens1z" type="checkbox" name="Horse_Racing" class="vis-hidden new-post-tags" value="Horse_Racing" />
-						<label for="chk_aliens1z">Horse Racing</label></div>
-                    <div><input id="chk_aliens1e" type="checkbox" name="Baseball" class="vis-hidden new-post-tags" value="Baseball" />
-						<label for="chk_aliens1e">Baseball</label></div>
-                    <div><input id="chk_aliens1w" type="checkbox" name="Basketball" class="vis-hidden new-post-tags" value="Basketball" />
-						<label for="chk_aliens1w">Basketball</label></div>
-                    <div><input id="chk_aliens1q" type="checkbox" name="Billiards" class="vis-hidden new-post-tags" value="Billiards" />
-						<label for="chk_aliens1q">Billiards</label></div>
-                    <div><input id="chk_aliens1t" type="checkbox" name="Running" class="vis-hidden new-post-tags" value="Running" />
-						<label for="chk_aliens1t">Running</label></div>
-                    <div><input id="chk_aliens1y" type="checkbox" name="Soccer" class="vis-hidden new-post-tags" value="Soccer" />
-						<label for="chk_aliens1y">Soccer</label></div>
-                    <div><input id="chk_aliens1u" type="checkbox" name="Tennis" class="vis-hidden new-post-tags" value="Tennis" />
-						<label for="chk_aliens1u">Tennis</label></div>
-                    <div><input id="chk_aliens1i" type="checkbox" name="Water_Sports" class="vis-hidden new-post-tags" value="Water_Sports" />
-						<label for="chk_aliens1i">Water Sports</label></div>
-                                    </div>
-            </div>
-                  <div class="border"></div>
-            <div class="wrapper">
-                <div class="leftSideBar">
-                    <div>Technology</div>
-                </div>
-                <div class="rightSideBar">
-		    <div><input id="chk_aliens1i1vve" type="checkbox" name="Technology" class="vis-hidden new-post-tags" value="Technology" />
-                                                <label for="chk_aliens1i1vve">Technology</label></div>
-
-                    <div><input id="chk_aliens1i1" type="checkbox" name="Software" class="vis-hidden new-post-tags" value="Software" />
-						<label for="chk_aliens1i1">Software</label></div>
-                    <div><input id="chk_aliens1i2" type="checkbox" name="Web_Design" class="vis-hidden new-post-tags" value="Web_Design" />
-						<label for="chk_aliens1i2">Web Design</label></div>
-                    <div><input id="chk_aliens1i3" type="checkbox" name="bots" class="vis-hidden new-post-tags" value="bots" />
-						<label for="chk_aliens1i3">bots</label></div>
-                    <div><input id="chk_aliens1i4" type="checkbox" name="Graphics" class="vis-hidden new-post-tags" value="Graphics" />
-						<label for="chk_aliens1i4">Graphics</label></div>
-                    <div><input id="chk_aliens1i5" type="checkbox" name="Internet" class="vis-hidden new-post-tags" value="Internet" />
-						<label for="chk_aliens1i5">Internet</label></div>
-                    <div><input id="chk_aliens1i7" type="checkbox" name="Mobile_Computing" class="vis-hidden new-post-tags" value="Mobile_Computing" />
-						<label for="chk_aliens1i7">Mobile Computing</label></div>
-                    <div><input id="chk_aliens1i8" type="checkbox" name="ai" class="vis-hidden new-post-tags" value="ai" />
-						<label for="chk_aliens1i8">Artificial Intelligence</label></div>
-                    <div><input id="chk_aliens1i9" type="checkbox" name="ml" class="vis-hidden new-post-tags" value="ml" />
-						<label for="chk_aliens1i9">Machine learning</label></div>
-                    <div><input id="chk_aliens1i0" type="checkbox" name="Engineering" class="vis-hidden new-post-tags" value="Engineering" />
-						<label for="chk_aliens1i0">Engineering</label></div>
-                    <div><input id="chk_aliens1ia" type="checkbox" name="iot" class="vis-hidden new-post-tags" value="iot" />
-						<label for="chk_aliens1ia">Internet Things</label></div>
-                    <div><input id="chk_aliens1is" type="checkbox" name="Multimedia" class="vis-hidden new-post-tags" value="Multimedia" />
-						<label for="chk_aliens1is">Multimedia</label></div>
-                    <div><input id="chk_aliens1id" type="checkbox" name="Science" class="vis-hidden new-post-tags" value="Science" />
-						<label for="chk_aliens1id">Science</label></div>
-                    <div><input id="chk_aliens1if" type="checkbox" name="Telecommunications" class="vis-hidden new-post-tags" value="Telecommunications" />
-						<label for="chk_aliens1if">Telecommunications</label></div>
-                    <div><input id="chk_aliens1ig" type="checkbox" name="Biotechnology" class="vis-hidden new-post-tags" value="Biotechnology" />
-						<label for="chk_aliens1ig">Biotechnology</label></div>
-                    <div><input id="chk_aliens1ih" type="checkbox" name="Chemistry" class="vis-hidden new-post-tags" value="Chemistry" />
-						<label for="chk_aliens1ih">Chemistry</label></div>
-                    <div><input id="chk_aliens1ij" type="checkbox" name="Electronics" class="vis-hidden new-post-tags" value="Electronics" />
-						<label for="chk_aliens1ij">Electronics</label></div>
-                    <div><input id="chk_aliens1ik" type="checkbox" name="Mechanics" class="vis-hidden new-post-tags" value="Mechanics" />
-						<label for="chk_aliens1ik">Mechanics</label></div>
-                    <div><input id="chk_aliens1il" type="checkbox" name="Health" class="vis-hidden new-post-tags" value="Health" />
-						<label for="chk_aliens1il">Health</label></div>
-                    <div><input id="chk_aliens1im" type="checkbox" name="Open Source" class="vis-hidden new-post-tags" value="Open Source" />
-						<label for="chk_aliens1im">Open Source</label></div>
-                                    </div>
-            </div>
-            <div class="border"></div>
-            <div class="wrapper">
-                <div class="leftSideBar">
-                    <div>Energy</div>
-                </div>
-                <div class="rightSideBar">
-		  <div><input id="chk_aliens1im1vev" type="checkbox" name="Energy" class="vis-hidden new-post-tags" value="Energy" />
-                                                <label for="chk_aliens1im1vev">Energy</label></div>
-
-                    <div><input id="chk_aliens1im1" type="checkbox" name="Solar Energy" class="vis-hidden new-post-tags" value="Solar Energy" />
-						<label for="chk_aliens1im1">Solar Energy</label></div>
-                    <div><input id="chk_aliens1im2" type="checkbox" name="Electric power" class="vis-hidden new-post-tags" value="Electric power" />
-						<label for="chk_aliens1im2">Electric power</label></div>
-                    <div><input id="chk_aliens1im3" type="checkbox" name="Fuels" class="vis-hidden new-post-tags" value="Fuels" />
-						<label for="chk_aliens1im3">Fuels</label></div>
-                    <div><input id="chk_aliens1im4" type="checkbox" name="Geothermal Energy" class="vis-hidden new-post-tags" value="Geothermal Energy" />
-						<label for="chk_aliens1im4">Geothermal Energy</label></div>
-                    <div><input id="chk_aliens1im5" type="checkbox" name="Oil" class="vis-hidden new-post-tags" value="Oil" />
-						<label for="chk_aliens1im5">Oil</label></div>
-                    <div><input id="chk_aliens1im6" type="checkbox" name="Smart Grid" class="vis-hidden new-post-tags" value="Smart Grid" />
-						<label for="chk_aliens1im6">Smart Grid</label></div>
-                    <div><input id="chk_aliens1im7" type="checkbox" name="Mining" class="vis-hidden new-post-tags" value="Mining" />
-						<label for="chk_aliens1im7">Mining</label></div>
-                    <div><input id="chk_aliens1im8" type="checkbox" name="Coal" class="vis-hidden new-post-tags" value="Coal" />
-						<label for="chk_aliens1im8">Coal</label></div>
-                    <div><input id="chk_aliens1im9" type="checkbox" name="Wind energy" class="vis-hidden new-post-tags" value="wind energy" />
-						<label for="chk_aliens1im9">Wind energy</label></div>
-                    <div><input id="chk_aliens1im0" type="checkbox" name="Renewable Energy" class="vis-hidden new-post-tags" value="Renewable Energy" />
-						<label for="chk_aliens1im0">Renewable Energy</label></div>
-                    <div><input id="chk_aliens1imw" type="checkbox" name="Nuclear Energy" class="vis-hidden new-post-tags" value="Nuclear Energy" />
-						<label for="chk_aliens1imw">Nuclear Energy</label></div>
-                    <div><input id="chk_aliens1ima" type="checkbox" name="hydroelectricity" class="vis-hidden new-post-tags" value="hydroelectricity" />
-						<label for="chk_aliens1ima">hydroelectricity</label></div>
-                    <div><input id="chk_aliens1ims" type="checkbox" name="Natural Gas" class="vis-hidden new-post-tags" value="Natural Gas" />
-						<label for="chk_aliens1ims">Natural Gas</label></div>
-                                    </div>
-            </div>
-            <div class="border"></div>
-            <div class="wrapper">
-                <div class="leftSideBar">
-                    <div>Miscellaneous</div>
-                </div>
-                <div class="rightSideBar">
-                    <div><input id="chk_aliens1im1z" type="checkbox" name="Holidays" class="vis-hidden new-post-tags" value="Holidays" />
-                                                <label for="chk_aliens1im1z">Holidays</label></div>
-		 <div><input id="chk_aliens1im1xz" type="checkbox" name="Travel" class="vis-hidden new-post-tags" value="Travel" />
-                                                <label for="chk_aliens1im1xz">Travel</label></div>
-
-                    <div><input id="chk_aliens1im2z" type="checkbox" name="Language" class="vis-hidden new-post-tags" value="Language" />
-                                                <label for="chk_aliens1im2z">Language</label></div>
-                    <div><input id="chk_aliens1im3z" type="checkbox" name="Military" class="vis-hidden new-post-tags" value="Military" />
-                                                <label for="chk_aliens1im3z">Military</label></div>
-                    <div><input id="chk_aliens1im4z" type="checkbox" name="Philosophy" class="vis-hidden new-post-tags" value="Philosophy" />
-                                                <label for="chk_aliens1im4z">Philosophy</label></div>
-                    <div><input id="chk_aliens1im5z" type="checkbox" name="Politics" class="vis-hidden new-post-tags" value="Politics" />
-                                                <label for="chk_aliens1im5z">Politics</label></div>
-                    <div><input id="chk_aliens1im6z" type="checkbox" name="Smart Grid" class="vis-hidden new-post-tags" value="sg" />
-                                                <label for="chk_aliens1im6z">Relationships</label></div>
-                    <div><input id="chk_aliens1im7z" type="checkbox" name="Relationships" class="vis-hidden new-post-tags" value="Relationships" />
-                                                <label for="chk_aliens1im7z">Employment and Work</label></div>
-                    <div><input id="chk_aliens1im8z" type="checkbox" name="Employment and Work" class="vis-hidden new-post-tags" value="Work" />
-                                                <label for="chk_aliens1im8z">Coal</label></div>
-                    <div><input id="chk_aliens1im9z" type="checkbox" name="Environment" class="vis-hidden new-post-tags" value="Environment" />
-                                                <label for="chk_aliens1im9z">Environment</label></div>
-                    <div><input id="chk_aliens1im0z" type="checkbox" name="Ethnicity" class="vis-hidden new-post-tags" value="Ethnicity" />
-                                                <label for="chk_aliens1im0z">Ethnicity</label></div>
-                    <div><input id="chk_aliens1imwz" type="checkbox" name="Soil erosion" class="vis-hidden new-post-tags" value="Soil erosion" />
-                                                <label for="chk_aliens1imwz">Soil erosion</label></div>
-                    <div><input id="chk_aliens1imsz" type="checkbox" name="Fisheries" class="vis-hidden new-post-tags" value="Fisheries" />
-                                                <label for="chk_aliens1imsz">Fisheries</label></div>
-		    <div><input id="chk_aliens1imsz" type="checkbox" name="Forestry" class="vis-hidden new-post-tags" value="Forestry" />
-                                                <label for="chk_aliens1imsz">Forestry</label></div>
-         
-                           </div>
-            </div>
-
-            </div>
+			{% endfor %}
             </form>
         </div>
+		</div>
+<script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
+<script src="{% static 'crawler/scripts/jquery.nicescroll.js' %}"></script>
+<script>
+console.log("Autocomplete does not work");
+var bar2=document.getElementById("addtheme");
+                    $(bar2).on('input',myFunction2());
+
+ function myFunction2() {
+                        console.log("The value of the input field was changed.");
+                        console.log(bar2.value);
+                        var url = "/get_suggestion?query="+bar2.value;
+
+                        var jsonFile = new XMLHttpRequest();
+                        jsonFile.open("GET",url,true);
+                        jsonFile.send();
+			console.log(jsonFile);
+                        jsonFile.onreadystatechange = function() {
+                            if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+                                //console.log(jsonFile.responseText);
+                                var resp=JSON.parse(jsonFile.responseText);
+                                var options = '';
+                                //console.log(resp[1]);
+                                //for(var i = 0; i < resp[1].length; i++)
+                                //    options += '<option value="'+resp[1][i]+'" />';
+                                //document.getElementById('suggestMore').innerHTML = options;
+                            }
+                         }
+                    }
+</script>
+<script>
+function nicescrolling(){
+$("#prioritytable").parent().getNiceScroll().resize();
+};
+$(function() {  
+    $("#prioritytable").parent().niceScroll({cursorcolor:"#00F",cursoropacitymin: 0.5,autohidemode: false,cursordragontouch: true,cursorwidth: "10px"});
+});
+var positions={};
+$('#adder').click(function(){
+positions={};
+$("#prioritytable tr").not("#noselect").remove();
+$("#prioritytable").css({'width':'99%','height':'auto'});
+var bool=false;
+var markup="";
+$("#noselect").hide();
+$('[id^="cat_"] .rightSideBar').each(function(){
+var count=1;
+var position={};
+$(this).find("input").each(function(){
+if($(this).prop('checked')==true){
+var temp=$(this).next("label").html()
+markup+="<td draggable='true' ondrop='drop_handler(event);' ondragend='dragend_handler(event);' ondragover='dragover_handler(event);' ondragstart='dragstart_handler(event);'>"+temp+"</td>";
+position[temp]=count;
+count+=1
+bool=true;
+}
+});
+if(bool==true){
+temp=$(this).parent().attr('value')
+markup="<tr><td style='background:burlywood;' align='center'><b>"+temp+"</b></td>"+markup+"</tr>";
+$("#prioritytable").append(markup);
+positions[temp]=position
+console.log(positions);
+}
+bool=false;
+markup="";
+nicescrolling();
+});
+});
+
+var source;
+var target;
+var sourcename;
+function dragstart_handler(ev){
+ev.dataTransfer.setData("text/html",ev.target.outerHTML);
+source=$(ev.target).parent().find('b').eq(0).html();
+sourcename=$(ev.target).html()
+}
+
+function dragover_handler(ev){
+ev.preventDefault();
+
+}
+
+
+function drop_handler(ev){
+ev.preventDefault();
+target=$(ev.target).parent().find('b').eq(0).html();
+if(source!=target){
+
+}
+else{
+var data=ev.dataTransfer.getData('text/html');
+var targetname=$(ev.target).html();
+$(ev.target).before(data);
+
+if(positions[source][sourcename]>positions[source][targetname]){
+temp=positions[source][sourcename];
+positions[source][sourcename]=positions[source][targetname];
+for(var key in positions[source]){
+	if(!positions[source].hasOwnProperty(key)) continue;
+
+		if(positions[source][key]>=positions[source][targetname] && positions[source][key]<=temp){
+				positions[source][key]+=1;
+		}
+}
+}
+else if(positions[source][sourcename]<positions[source][targetname]){
+temp=positions[source][sourcename];
+positions[source][sourcename]=positions[source][targetname]-1;
+for(var key in positions[source]){
+	if(!positions[source].hasOwnProperty(key)) continue;
+
+		if(positions[source][key]<positions[source][targetname] && positions[source][key]>temp){
+				if(key!=sourcename){
+					positions[source][key]-=1;
+					}
+		}
+}
+}
+console.log(positions);
+}
+}
+
+function dragend_handler(ev){
+if(source==target){
+$(ev.target).remove();
+}
+}
+</script>
+<script>
+            var bar=document.getElementById("searchtext");
+            var cat=[{% for key,value in categories.items %}"{{key}}",{% endfor %}"tobedeleted"]
+			var index = cat.indexOf("tobedeleted");
+			if (index > -1) {
+				cat.splice(index, 1);
+			}
+		    bar.oninput = function() {myFunction()};
+			function myFunction(){
+			var options = '';
+			for(var i=0;i<cat.length;i++){
+			if(bar.value.length>0){
+				if(bar.value==cat[i]){
+					$("#dup_"+cat[i].replace(/ /g,'')).show();
+					$("#dup_"+cat[i].replace(/ /g,'')).trigger('click');
+				}
+				else if(bar.value.lower==cat[i].slice(0,bar.value.length).lower){
+					options += '<option value="'+cat[i]+'" />';
+				}
+			}
+			}
+			document.getElementById('suggest').innerHTML = options;
+			}
+            
+                </script>
+
+<script>
+/*$(document).ready(function(){
+$('[id^=cat_] input').before("<img src='http://www.abc.net.au/news/image/8622742-1x1-700x700.jpg' width='100px' height='100px' alt='none'><br>");
+});*/
+$(".duplicate").click(function(){
+id=$(this).attr('value');
+$('.duplicate').css({'background':'#000066','color':'white'});
+$('[id^=cat_]').each(function(){
+if($(this).find('input:checkbox:checked').length>0){
+	var temp=$(this).attr('id').split('_');
+	var temp1=temp[1];
+	for(var i=2;i<temp.length;i++){
+		temp1+="_"+temp[i];
+	}
+	$('#dup_'+temp1).css({'background':'yellowgreen','color':'honeydew'});
+}
+});
+if($('#cat_'+id).css('display')=='none'){
+$('[id^=cat_]').hide();
+$('#cat_'+id).show();
+if($('#cat_'+id).find('input:checkbox:checked').length>0){
+	$(this).css({'background':'yellowgreen','color':'honeydew'});
+}
+else{
+	$(this).css({'background':'#1e88e5','color':'honeydew'});
+}
+}
+else{
+$('#cat_'+id).hide();
+if($('#cat_'+id).find('input:checkbox:checked').length<1){
+	$(this).css({'background':'#000066','color':'white'});
+}
+}
+$('#cat_'+id+' img').click(function(){
+$(this).nextAll('label').first().trigger('click');
+});
+});
+function sendpriorities(){
+$("#hiddendata").val(JSON.stringify(positions));
+$("#mainform").submit();
+}
+</script>
     </body>
     <html>
-Fisheries

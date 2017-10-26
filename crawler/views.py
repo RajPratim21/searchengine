@@ -8,13 +8,14 @@ from django.contrib.auth.models import User
 from pymongo import MongoClient
 import requests
 import urllib2
-
+from collections import OrderedDict
 import time,json
 import re
 import threading
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.http import HttpResponseRedirect
 from django.contrib.auth import logout
 from crawler.models import RegistrationForm
@@ -50,7 +51,7 @@ reload(sys)
 #from settings import Q
 sys.setdefaultencoding('utf-8')
 print "Graph formation complete..."
-
+supercounter = 0
 
 url_pool = [
 			#("https://www.theverge.com/tech",3)
@@ -97,12 +98,40 @@ collection = db.docs
 import urlparse
 
 def config(request):
+        configlist=db.configlist.find()
+        configsubcategory=db.configsubcat.find()
+        categories={}
+        categoryimg={}
+        subcategoryimg={}
+        #subsubcatimg={}
+        with open("crawler/categoryimglinks","r") as f1,open("crawler/subcatimglinks","r") as f2:
+            for line in f1:
+                line=line.split(" : ")
+                categoryimg[line[0].strip()]=line[1].strip()
+            for line in f2:
+                line=line.split(" : ")
+                catsub=line[0].split("__")
+                subcategoryimg.setdefault(catsub[0].strip(),{})
+                subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
+                
+        for i in configlist:
+            categories[i["Category"]]={}
+            for j in i["Subcategories"]:
+                categories[i["Category"]][j]=[]
+        for i in configsubcategory:
+            if i["Category"] in categories and i["Subcategory"] in categories[i["Category"]]:
+                categories[i["Category"]][i["Subcategory"]]=i["Subsubcategories"]
+                
 	return render(
         request,
         'crawler/config.html',
         {
             'title':'Demo Content',
             'year': datetime.now().year,
+            'categories':categories,
+            'categoryimg':categoryimg,
+            'subcategoryimg':subcategoryimg,
+            #'subsubcatimg':subsubcatimg,
         }
     )
 
@@ -110,150 +139,38 @@ def add_config(request):
 	if request.user=="AnonymousUser":
 		return HttpResponseRedirect('/login')
 	print request.user
-	choice=""
-	for key in request.GET:
-		choice=choice+key+","
-	print choice
-	db.config.update_one({"user":str(request.user)},{"$set":{"user":str(request.user),"choice":escape(choice)}}, upsert=True)
+	choices=OrderedDict()
+	priorities=request.POST.get("priorities",1)
+	priorities=json.loads(priorities)
+	print priorities
+        category=[]
+	for key in request.POST:
+	    if "cat_" in str(key):
+	       print key
+	       key=request.POST.get(key,"")
+	       print key
+	       key=key.split("__")
+	       print key
+	       if len(key)>1:
+	            if key[0] not in category:
+        	       category.append(key[0])
+       	            choices.setdefault(key[0],[])
+       	            choices[key[0]].append(key[1])
+       	choices.setdefault("Mining and Drilling",[])
+	choices.setdefault("Environment",[])
+	choices.setdefault("Agriculture and Forestry",[])
+	choices.setdefault("Opportunities",[])
+	choices.setdefault("Business Services",[])
+	print choices
+        for i in category:
+            choices[i].sort(key=priorities[i].get)
+        print choices
+	db.config.update_one({"user":str(request.user)},{"$set":{"user":str(request.user),"choice":choices}}, upsert=True)
 	#import news_personalization
 	return HttpResponseRedirect('/home')
 
 def is_absolute(url):
     return bool(urlparse.urlparse(url).netloc)
-
-
-
-class AllThreads(threading.Thread):
-	
-	print('crawl')
-	def __init__(self,url,period):
-		period = period
-		threading.Thread.__init__(self)
-		self.url = url
-	def crawl(self,url_pool,period):
-		print "crawwling..."
-		if(urllib2.urlopen(self.url)):
-			page = urllib2.urlopen(self.url)
-			soup = BeautifulSoup(page)
-			all_links = soup.find_all("a") 
-			for link in all_links:
-				new_link = link.get("href")
-				if new_link not in zip(*url_pool):
-					if not is_absolute(new_link):
-						try:
-							if "/goo.gl" in new_link or"facebook" in new_link or "twitter" in new_link:
-								return
-							else:
-								url_pool.append((self.url + str(new_link),1))
-							
-							#id = self.url
-							#print id
-							#id = datetime.now()
-							if "/goo.gl" in new_link or "facebook" in new_link or "twitter" in new_link:
-								return
-							else:
-
-								print '########if print'
-								#print self.url 
-								print 'new link ' +str(new_link)
-								
-								
-								print "going to parse"
-								try:
-									text,header,scorelist,scores, flagindex, ent_list = parse(str(new_link))
-									print "Success"
-									ok=True
-								except Exception as e:
-									text=""
-									header=""
-									scorelist=[]
-									scores=0
-									flagindex=1
-									ent_list=[]
-									print "Fail"
-									ok = False
-
-								 
-								id = header
-								dict1 = {"scores":scorelist,"link":self.url + str(new_link),"data":text,"header":header,"votes":scores, "entity":ent_list, "flagindex":flagindex}
-								data = json.dumps(dict1, ensure_ascii=False)
-								if ok:
-									print "Inserting "
-									#print data
-									#es.index(index='sw', doc_type='people', id=id,body=json.loads(data))
-									if not header=="none":
-										if(flagindex=="Technology"):
-											es.index(index='doctechnology', doc_type='people', id=id,body=json.loads(data))
-										elif(flagindex=="Business"):
-											es.index(index='docbusiness', doc_type='people', id=id,body=json.loads(data))
-										elif(flagindex=="Other Category"):
-											es.index(index='docothers', doc_type='people', id=id,body=json.loads(data))
-										else:
-											es.index(index='docenergy', doc_type='people', id=id,body=json.loads(data))
-								#with open("doc.json", "w") as f:
-	    								#json.dump(list(collection.find()), f)
-						except urllib2.HTTPError as e:
-    							error_message = e.read()
-    							print "error part1",error_message
-
-					else:
-						try:
-							if "/goo.gl" in new_link or "facebook" in new_link or "twitter" in new_link:
-								pass
-							else:
-								url_pool.append((str(new_link),1))
-							id = datetime.now()
-							ok=True
-							print '########else print'
-							#print self.url 
-							print str(new_link)
-								
-							print str(new_link)
-							if "/goo.gl" in new_link or "facebook" in new_link or "twitter" in new_link:
-								pass
-							else:
-								try:
-									text,header,scorelist,scores, flagindex, ent_list = parse(str(new_link))
-									print "Success"
-									ok=True
-								except Exception as e:
-									print "fail"
-									text=""
-									header=""
-									scorelist=[]
-									scores=0
-									flagindex=1
-									ent_list=[]
-									ok=False
-									#print data
-								#print header
-								#print scorelist
-								#print scores
-								
-
-								
-								dict1 = {"scores":scorelist,"link":self.url + str(new_link),"data":text,"header":header,"votes":scores, "entity":ent_list, "flagindex":flagindex}
-								data = json.dumps(dict1, ensure_ascii=False)
-								if ok:
-									print "Inserting"
-
-									#print data
-									#es.index(index='sw', doc_type='people', id=id,body=json.loads(data))
-									if not header=="none":
-										if flagindex=="Technology":
-											es.index(index='doctechnology', doc_type='people', id=id,body=json.loads(data))
-										elif flagindex=="Business":
-											es.index(index='docbusiness', doc_type='people', id=id,body=json.loads(data))
-										elif flagindex=="Other Category":
-											es.index(index='docothers', doc_type='people', id=id,body=json.loads(data))	
-										else:
-											es.index(index='docenergy', doc_type='people', id=id,body=json.loads(data))
-							
-						except urllib2.HTTPError as e:
-							error_message = e.read()
-    						#print "error part2",error_message
-		 	time.sleep(period)
-		 	self.crawl(url_pool,period)
 
 
 
@@ -294,72 +211,6 @@ def start(request):
         }
     )
 
-def newcrawlwired(request):
-	print 'here'
-	driver("http://www.wired.com")
-def newcrawlmash(request):
-	print 'here'
-	driver("http://mashable.com/")
-
-def newcrawltc(request):
-	print 'here'
-	driver("https://techcrunch.com/")
-def newcrawlso(request):
-	print 'here'
-	driver("https://stackoverflow.com/")
-def newcrawlse(request):
-	print 'here'
-	driver("https://stackexchange.com/")
-def newcrawlQ(request):
-	print 'here'
-	driver("https://www.quora.com/How-much-have-you-invested-in-Bitcoin")
-def newcrawlwsj(request):
-	print 'here'
-	driver("https://www.wsj.com/india")
-def newcrawlespn(request):
-	print 'here'
-	driver("http://www.espn.in/")
-def newcrawltv(request):
-	print 'here'
-	driver("https://www.theverge.com/")
-def newcrawlabc(request):
-	print 'here'
-	driver("http://abc.go.com/")
-def newcrawlign(request):
-	print 'here'
-	driver("http://in.ign.com/")
-def newcrawlhindu(request):
-	print 'here'
-	driver("http://www.thehindu.com/")
-def newcrawlppl(request):
-	print 'here'
-	driver("http://www.biographyonline.net/people/famous-100.html")
-
-def newwikicrawlagri(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Agriculture")	
-def newwikicrawlbiz(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Business")	
-def newwikicrawltech(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Technology")	
-def newwikicrawlsports(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Sport")	
-def newwikicrawlppl(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Sport")	
-def newwikicrawlenergy(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Energy")	
-def newwikicrawlwm(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Water_resource_management")	
-def newwikicrawl(request):
-	print 'wiki crawl'
-	driverwiki("https://en.wikipedia.org/wiki/Main_Page")	
-
 def signup(request):
 	if request.method == 'POST':
 	    form = RegistrationForm(request.POST)
@@ -397,12 +248,213 @@ def configuration(request):
 	        'crawler/config.html'
 	    )	
 import os
-def news(request):
+def news(request,home=False):
 	if 1==1:
-                template = loader.get_template('crawler/news.html')
+	        import requests
+	        if request.GET.get('query'):
+	           if request.GET.get('page'):
+	               try:
+	                   page=int(request.GET.get('page'))
+	               except:
+	                   page=1
+	           else:
+	               page=1
+	           
+	           query=request.GET.get('query')
+		   print query
+	           if query.replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia"]:
+	               URL = "http://localhost:9200/doc"+query.replace(" ","").replace("_","").lower()+"/_search?size=1000&q=*:*"
+	           else:
+	               URL = "http://localhost:9200/docai/_search?size=1000&q=*:*"  
+	           r = requests.get(url = URL)
+                   # extracting data in json format
+                   data = r.json()
+                   jsondata={}
+                   jlist=[]
+		   slist=[]
+                   data = data['hits']['hits']
+                   maxpage=len(data)/30
+                   if maxpage<(page-1):
+                       page=1
+                   print page
+                  
+		   for rows in data[30*(page-1):30*page]:
+                       jlist.append(rows['_source'])
+                   def getkey(val):
+                          ###print val['scores'][1]
+                       if len(val['scores'])>1:
+                           return val['scores'][1]
+                       else:		
+                           return 0.209
+                   for row in data:
+		   	slist.append(row['_source']) 
+		   slist.sort(key =getkey, reverse=True) 
+		   ourlist =slist[30*(page-1):30*page] #[-51:]
+                   #ourlist.sort(key =getkey, reverse=True)
+                   jsondata.update({'articles':ourlist,'page':page,'maxpage':maxpage})
+	           return HttpResponse(json.dumps(jsondata),content_type="application/json")
+	           
+                if request.GET.get('page'):
+                    try:
+                        page=int(request.GET.get('page'))
+                    except:
+                        page=1
+                else:
+                    page=1
+                if(not home):
+                    template = loader.get_template('crawler/news.html')
+                else:
+                    template = loader.get_template('crawler/home.html')
                 #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
                 #response = response.json()
                 #print response
+                coll=db.config
+                try:
+                    cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    for key,value in cur.items():
+                        if key=="choice":        
+                            choice=value
+                except:
+                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[]}
+
+                options=OrderedDict()
+                categoryimg={}
+                subcategoryimg={}
+                selectedcat=""
+                template = loader.get_template('crawler/home.html')
+                #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+                #response = response.json()
+                #print response
+                coll=db.config
+                try:
+                    cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    for key,value in cur.items():
+                        print key,value
+		    	if key=="choice":        
+                            choice=value
+                except:
+                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[]}
+
+                options=OrderedDict()
+                categoryimg={}
+                subcategoryimg={}
+                selectedcat=""
+                for key,value in choice.items():
+                    if len(value)>0:
+                        selectedcat=key+value[0]
+                    else:
+                        selectedcat=key
+                    break
+                
+                with open("crawler/categoryimglinks") as f1,open("crawler/subcatimglinks") as f2:
+                    for line in f1:
+                        line=line.split(" : ")
+                        if line[0].strip() in choice:
+                            categoryimg[line[0].strip()]=line[1].strip()
+                    for line in f2:
+                        line=line.split(" : ")
+                        catsub=line[0].split("__")
+                        if catsub[0].strip() in choice:
+                            subcategoryimg.setdefault(catsub[0].strip(),{})
+                            if catsub[1].strip() in choice[catsub[0].strip()]:
+                                subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
+                for i in choice:
+                    options[i]=categoryimg[i]
+                    for j in choice[i]:
+                        options[j+'/'+i]=subcategoryimg[i][j]
+			
+                print selectedcat, options
+		# api-endpoint
+		for key in options:
+		    temp=key
+		    print key
+		    break
+		print temp
+		if temp.replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia"]:
+                    URL = "http://localhost:9200/doc"+temp.replace(" ","").replace("_","").lower()+"/_search?size=1000&q=*:*"
+		else:
+		    URL = "http://localhost:9200/docmininganddrilling/_search?size=1000&q=*:*"  
+					     
+		if home:
+		    URL = "http://localhost:9200/docnewsandmedia/_search?size=1000&q=*:*"  
+		        
+		if request.GET.get('theme'):
+		    selectedcat=request.GET.get('theme')
+		    myvar=False
+		    for key,value in choice.items():
+		        if selectedcat==key:
+		            myvar=True
+		            break
+                        else:
+                            if selectedcat in value:
+                                myvar=True
+                                break
+                    if not myvar:
+                        selectedcat="News and Media"
+                    URL = "http://localhost:9200/doc"+selectedcat.replace(" ","").replace("_","").lower()+"/_search?size=1000&q=*:*"
+
+		# sending get request and saving the response as response object
+		r = requests.get(url = URL)
+
+		# extracting data in json format
+		data = r.json()
+		jsondata={}
+		jlist=[]
+		data = data['hits']['hits']
+		maxpage=len(data)/30
+		if maxpage<(page-1):
+		    page=1  
+
+		for rows in data[30*(page-1):30*page]:
+			jlist.append(rows['_source'])
+		def getkey(val):
+			#print val['scores'][1]
+			if len(val['scores'])>0:
+				return val['scores'][0]
+			else:		
+				return 0.201
+		slist=[]
+		counter=-600
+	  	for row in data:
+			if len(row['_source']['data'])>600:
+				#while row['_source']['data'][counter]!=' ':    
+				if row['_source']['data'][counter]!=' ': 
+                                        counter=counter+1
+				if row['_source']['data'][counter]!=' ':
+                                        counter=counter+1
+				if row['_source']['data'][counter]!=' ':
+                                        counter=counter+1
+				if row['_source']['data'][counter]!=' ':
+                                        counter=counter+1
+				if row['_source']['data'][counter]!=' ':
+                                        counter=counter+1
+				if row['_source']['data'][counter]!=' ':
+                                        counter=counter+1
+
+                                row['_source']['data'] =  row['_source']['data'][counter:]
+                        slist.append(row['_source'])
+                slist.sort(key =getkey, reverse=True)
+                ourlist =slist[30*(page-1):30*page] #[-51:]	
+		
+		#ourlist.sort(key =getkey, reverse=True)
+	
+		jsondata.update({'articles':ourlist})
+	
+		#for val in jlist:
+		#	print val['header'], val['scores'][1]
+		variables = Context({ 
+			'user': request.user ,
+                        'title':'Demo Content',
+                        'year': datetime.now().year,
+                        'feed': jsondata,
+                        'options': options,
+                        'selectedcat': selectedcat,
+                        'page': page,
+                        'maxpage': maxpage,
+                   })
+                output = template.render(variables)
+
+		'''
            	if os.path.exists(str(request.user)+'.txt'):
                         with open(str(request.user)+'.txt') as json_file:
                                 data = json.load(json_file)
@@ -421,12 +473,185 @@ def news(request):
                                 'feed': data
                              })
                         output = template.render(variables)
-
-
+   
+		'''
 		return HttpResponse(output)
+
+
+def newsai(request):
+        if 1==1:
+                template = loader.get_template('crawler/news.html')
+                #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+                #response = response.json()
+                #print response
+                import requests
+
+                # api-endpoint
+                URL = "http://localhost:9200/docrealestate/_search?size=1000&q=*:*"
+
+                # sending get request and saving the response as response object
+                r = requests.get(url = URL)
+
+                # extracting data in json format
+                data = r.json()
+                jsondata={}
+                jlist=[]
+                data = data['hits']['hits']
+                for rows in data:
+                        jlist.append(rows['_source'])
+                def getkey(val):
+                        #print val['scores'][1]
+                        if len(val['scores'])>0:
+                                return val['scores'][0]
+                        else:
+                                return 0.299
+                ourlist =jlist #[-51:]
+                ourlist.sort(key =getkey, reverse=True)
+                jsondata.update({'articles':ourlist})
+
+                #for val in jlist:
+                #       print val['header'], val['scores'][1]
+                variables = Context({
+                        'user': request.user ,
+                        'title':'Demo Content',
+                        'year': datetime.now().year,
+                        'feed': jsondata
+                   })
+                output = template.render(variables)
+                return HttpResponse(output)
+
+
+
+def newsagri(request):
+        if 1==1:
+                template = loader.get_template('crawler/news.html')
+                #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+                #response = response.json()
+                #print response
+                import requests
+
+                # api-endpoint
+                URL = "http://localhost:9200/docopportunities/_search?size=1000&q=*:*"
+
+                # sending get request and saving the response as response object
+                r = requests.get(url = URL)
+
+                # extracting data in json format
+                data = r.json()
+                jsondata={}
+                jlist=[]
+                data = data['hits']['hits']
+                for rows in data:
+                        jlist.append(rows['_source'])
+                def getkey(val):
+                        #print val['scores'][1]
+                        if len(val['scores'])>0:
+                                return val['scores'][0]
+                        else:
+                                return 0.299
+                ourlist =jlist #[-51:]
+                ourlist.sort(key =getkey, reverse=True)
+                jsondata.update({'articles':ourlist})
+
+                #for val in jlist:
+                #       print val['header'], val['scores'][1]
+                variables = Context({
+                        'user': request.user ,
+                        'title':'Demo Content',
+                        'year': datetime.now().year,
+                        'feed': jsondata
+                   })
+                output = template.render(variables)
+                return HttpResponse(output)
+
+
+
+
+def newsenv(request):
+        if 1==1:
+                template = loader.get_template('crawler/home.html')
+                #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
+                #response = response.json()
+                #print response
+                import requests
+                coll=db.config
+                try:
+                    cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    for key,value in cur.items():
+                        if key=="choice":        
+                            choice=value
+                except:
+                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[]}
+
+                options=OrderedDict()
+                categoryimg={}
+                subcategoryimg={}
+                with open("crawler/categoryimglinks") as f1,open("crawler/subcatimglinks") as f2:
+                    for line in f1:
+                        line=line.split(" : ")
+                        if line[0].strip() in choice:
+                            categoryimg[line[0].strip()]=line[1].strip()
+                    for line in f2:
+                        line=line.split(" : ")
+                        catsub=line[0].split("__")
+                        if catsub[0].strip() in choice:
+                            subcategoryimg.setdefault(catsub[0].strip(),{})
+                            if catsub[1].strip() in choice[catsub[0].strip()]:
+                                subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
+                for i in choice:
+                    options[i]=categoryimg[i]
+                    for j in choice[i]:
+                        options[j]=subcategoryimg[i][j]
+                #print options
+                # api-endpoint
+                URL = "http://localhost:9200/docnewsandmedia/_search?size=1000&q=*:*"
+
+                # sending get request and saving the response as response object
+                r = requests.get(url = URL)
+
+                # extracting data in json format
+                data = r.json()
+                jsondata={}
+                jlist=[]
+                data = data['hits']['hits']
+                for rows in data:
+                        jlist.append(rows['_source'])
+                def getkey(val):
+                        #print val['scores'][1]
+                        if len(val['scores'])>0:
+                                return val['scores'][0]
+                        else:
+                                return 0.299
+                ourlist =jlist #[-51:]
+                ourlist.sort(key =getkey, reverse=True)
+                jsondata.update({'articles':ourlist})
+
+                #for val in jlist:
+                #       print val['header'], val['scores'][1]
+                variables = Context({
+                        'user': request.user ,
+                        'title':'Demo Content',
+                        'year': datetime.now().year,
+                        'feed': jsondata,
+                        'options':options
+                   })
+                output = template.render(variables)
+                return HttpResponse(output)
+
+
+
+
+
+
+
+
+
+
 def home(request):
 	import news_personalization
 	if not request.GET.get('query'):
+		output = news(request,home=True)	
+		'''
 		template = loader.get_template('crawler/home.html')
 		#response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
 		#response = response.json()
@@ -452,7 +677,7 @@ def home(request):
                                 'feed': data
                              })
                         output = template.render(variables)
-
+		'''
 	else :
 		#print "poppy"
 		x = str(request.GET.get('query')).lower() 
@@ -468,7 +693,7 @@ def home(request):
 				data.append(r)
 				query_string=query_string+' '+r
 		query_string = 	query_string[0:]
-
+		db.SearchHistory.update_one({"user":str(request.user)},{"$set":{"history":query_string.split(' '),"user":str(request.user)}}, upsert=True)
 		bigrams2 = ngrams(data, 5)
 	  	#print "fivegrams"
 	  	for grams in bigrams2:
@@ -631,13 +856,43 @@ def home(request):
 		template = loader.get_template('crawler/search.html')
 		if len(summary)>5:
 			summary=summary[:5]
+		#db connection
+		coll=db.config
+                try:
+                    cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    for key,value in cur.items():
+                        if key=="choice":        
+                            choice=value
+                except:
+                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[]}
+
+                options=OrderedDict()
+                categoryimg={}
+                subcategoryimg={}
+                with open("crawler/categoryimglinks") as f1,open("crawler/subcatimglinks") as f2:
+                    for line in f1:
+                        line=line.split(" : ")
+                        if line[0].strip() in choice:
+                            categoryimg[line[0].strip()]=line[1].strip()
+                    for line in f2:
+                        line=line.split(" : ")
+                        catsub=line[0].split("__")
+                        if catsub[0].strip() in choice:
+                            subcategoryimg.setdefault(catsub[0].strip(),{})
+                            if catsub[1].strip() in choice[catsub[0].strip()]:
+                                subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
+                for i in choice:
+                    options[i]=categoryimg[i]
+                    for j in choice[i]:
+                        options[j]=subcategoryimg[i][j]
+
 		variables = Context({ 'user': request.user ,
 	            'title':'Demo Content',
 	            'year': datetime.now().year,
 	            'results' : res,
 		    'query': request.GET.get('query'),
 		    'summary':summary
-	        })
+		 })
 		output = template.render(variables)
 	return HttpResponse(output)
 
@@ -653,6 +908,4 @@ def get_suggestion(request):
 def logout_page(request):
     logout(request)
     return HttpResponseRedirect('/login')
-
-
 

@@ -65,7 +65,6 @@ with open('newsjson.txt') as data_file:
             #i=i+1
 
 for val in keyfiles:
-	print 'dscsdcdsdcdsc', val	
 	print 
 cursor = db.config.find()
 i=0

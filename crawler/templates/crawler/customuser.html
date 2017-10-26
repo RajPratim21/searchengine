@@ -7,11 +7,18 @@
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/bootstrap.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/formdesign.css' %}" />
-
+    <style>
+	#prioritytable td{
+		border:1px solid;
+c		background:#ffff66;
+		cursor:pointer;
+		text-align:center;
+	}
+    </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container-fluid">
        
         <div class="collapse navbar-collapse" id="myNavbar">
@@ -19,9 +26,9 @@
           {% if user.is_authenticated and user.username %}
             <ul class="nav navbar-nav navbar-right">
 
-              <li><a href="/config"><span class="glyphicon glyphicon-cog"></span></a></li>
-              <li><a><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a></li>
-              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+              <li><a class="navside" href="/config"><span class="glyphicon glyphicon-cog"></span></a></li>
+              <li><a class="navside" ><span class="glyphicon glyphicon-user"></span><b> {{ user.username }}</b></a></li>
+              <li><a class="navside" href="/logout"><span class="glyphicon glyphicon-log-out"></span><b> Logout</b></a></li>
             </ul>
           {% endif %}
         </div>
@@ -30,6 +37,43 @@
 
     <script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
     <script src="{% static 'crawler/scripts/bootstrap.js' %}"></script>
+<script>
+var source;
+var target;
+
+function dragstart_handler(ev){
+ev.dataTransfer.setData("text/html",ev.target.outerHTML);
+source=$(ev.target).parent().find('b').eq(0).html();
+}
+
+function dragover_handler(ev){
+ev.preventDefault();
+
+}
+
+
+function drop_handler(ev){
+ev.preventDefault();
+target=$(ev.target).parent().find('b').eq(0).html();
+if(source!=target){
+
+}
+else{
+var data=ev.dataTransfer.getData('text/html');
+
+$(ev.target).before(data);
+}
+}
+
+function dragend_handler(ev){
+
+
+if(source==target){
+$(ev.target).remove();
+}
+}
+
+</script>
 {% block scripts %}{% endblock %}
 {% block content %}{% endblock %}
 
