@@ -32,6 +32,7 @@ from nltk.util import ngrams
 import io
 import networkx as nx
 from searchengine.settings import Q
+from searchengine.settings import G
 import math
 #from googletrans import Translator
 #translator = Translator()
@@ -335,12 +336,16 @@ def news(request,home=False):
 	           else:
 	               page=1
 
-	           
+	           jsondata={}
 	           query=request.GET.get('query')
 		   print query
-		   temp = query.split('/')
+		   temp = query.split('/')[0]
                    print temp
-                   if len(temp)>1:
+                   res=duck_lets_go(temp+" news")[3:]
+                   maxpage=len(res)/30
+                   jsondata.update({'articles':res,'page':page,'maxpage':maxpage})
+	           return HttpResponse(json.dumps(jsondata),content_type="application/json")
+                   """if len(temp)>1:
                    	if temp[0].replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia","china","japan","korea"]:
                                 docstring ='doc'+temp[0].replace(" ","").replace("_","").lower()
                         elif temp[1].replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia"]:
@@ -460,7 +465,7 @@ def news(request,home=False):
                    #ourlist.sort(key =getkey, reverse=True)
 		   print '*****Rec6**'
                    jsondata.update({'articles':ourlist,'page':page,'maxpage':maxpage})
-	           return HttpResponse(json.dumps(jsondata),content_type="application/json")
+	           return HttpResponse(json.dumps(jsondata),content_type="application/json")"""
 	           
                 if request.GET.get('page'):
                     try:
@@ -546,7 +551,7 @@ def news(request,home=False):
 		    print key
 		    break
 		temp = temp.split('/')
-		if len(temp)>1:
+		"""if len(temp)>1:
 			if temp[0].replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia","china","korea","japan"]:
 				docstring ='doc'+temp[0].replace(" ","").replace("_","").lower()
 			elif temp[1].replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia"]:
@@ -724,26 +729,48 @@ def news(request,home=False):
 		#ourlist.sort(key =getkey, reverse=True)
 	
 		jsondata.update({'articles':ourlist})
-		print '*****Rec3**'
+		print '*****Rec3**'"""
 		try:
 			likedlinks=db.LikedPosts.find_one({'user':str(request.user)},{'cardlink':1,'_id':False})
 			likedlinks=[i.encode('utf-8') for i in likedlinks['cardlink']]
 			print likedlinks
 		except:
 			pass
+		if not home:
+		    if request.GET.get('query'):
+		        res=duck_lets_go(request.GET.get('query').split("/")[0]+" news")[3:]
+                    else:
+              		res = duck_lets_go("xyz")[3:]
+              	else:
+              	    res=duck_lets_go("xyz")[3:]
+              	    
+              	maxpage=len(res)/30
 		#for val in jlist:
 		#	print val['header'], val['scores'][1]
-		variables = Context({ 
+		if True:
+          		variables = Context({ 
 			'user': request.user ,
                         'title':'Demo Content',
                         'year': datetime.now().year,
-                        'feed': jsondata,
+                        'feed': res,
                         'options': options,
                         'selectedcat': selectedcat,
                         'page': page,
                         'maxpage': maxpage,
                         'likedlinks': likedlinks
-                   })
+                        })
+                else:
+                        variables = Context({ 
+			'user': request.user ,
+                        'title':'Demo Content',
+                        'year': datetime.now().year,
+                        'feed': res,
+                        'options': options,
+                        'selectedcat': selectedcat,
+                        'page': page,
+                        'maxpage': maxpage,
+                        'likedlinks': likedlinks
+                        })
                 output = template.render(variables)
 
 		'''
@@ -924,7 +951,7 @@ def home(request):
 		#print "poppy"
 		x = str(request.GET.get('query')).lower() 
 		if request.GET.get('theme'):
-                    theme=request.GET.get('theme').split("/")[0]
+                    theme=" ".join(request.GET.get('theme').split("/"))
                     if theme=="all":
                         theme=""
                 else:
@@ -952,8 +979,8 @@ def home(request):
                         #x = translator.translate(x, dest='zh-TW').text
 			x = TextBlob(unicode(x))
                         x = x.translate(to='zh-TW')
-		x+=theme
-		res = duck_lets_go(x)[3:]
+		y=x+' '+theme
+		res = duck_lets_go(y)[3:]
 	        #raise ValueError("hi")
 		for i in res:
 		    if "duckduckgo" in i.get("link"):
@@ -974,7 +1001,7 @@ def home(request):
                                 res[i]["sum"] = j["sum"]
 			print res
           
-		'''
+	
 		x = x.split(' ')
 		
 		stop_words = set(stopwords.words('english'))
@@ -986,14 +1013,18 @@ def home(request):
 			if not r in stop_words:
 				data.append(r)
 				query_string=query_string+' '+r
-		query_string = 	query_string[1:].split(" ")
-		for string in query_string:
-		    db.SearchHistory.update_one({"user":str(request.user)},{"$push":{"history":string},"$set":{"user":str(request.user)}}, upsert=True)
+		#query_string = 	query_string[1:].split(" ")
+		#for string in query_string:
+		db.SearchHistory.update_one({"user":str(request.user)},{"$push":{"history":query_string},"$set":{"user":str(request.user)}}, upsert=True)
+		db.SearchHistory.update_one({"user":str(request.user)},{"$push":{"themehistory":theme},"$set":{"user":str(request.user)}}, upsert=True)
+
 		import subprocess
 		try:
 		    subprocess.Popen([sys.executable,"updateindex2.py"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 		except:
 		    print "na ho paega"
+
+		'''
 		bigrams2 = ngrams(data, 5)
 	  	#print "fivegrams"
 	  	for grams in bigrams2:
@@ -1254,8 +1285,18 @@ def home(request):
                     for j in choice[i]:
                         options[j+'/'+i]=subcategoryimg[i][j]
                 print 'RRRRRRRRRRRRRRRR', options 
+		Scursor = db.SearchHistory.find({'user':str(request.user)})
+       	 	'''
+		search_hist = []
+        	for hist in Scursor:
+                	print hist['history']
+                	for val in hist['history']:
+				search_hist.append(val)
+		'''
+		from updateindex2 import find_history
+		search_hist = find_history(str(request.user), G) 		
                 template = loader.get_template('crawler/search.html')
-
+		
 		variables = Context({ 'user': request.user ,
 	            'title':'Demo Content',
 	            'year': datetime.now().year,
@@ -1263,6 +1304,7 @@ def home(request):
 		    'query': request.GET.get('query'),
 		    'summary':zip(*res)[:2],
 		    'options' :options,
+		    'search_patern':search_hist,
 		    'selectedcat' :selectedcat,
 		 })
 		output = template.render(variables)
