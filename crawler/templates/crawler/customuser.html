@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - XEngine</title>
+    <title>{{ title }}</title>
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/bootstrap.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/formdesign.css' %}" />
@@ -24,8 +24,14 @@ c		background:#ffff66;
         <div class="collapse navbar-collapse" id="myNavbar">
 
           {% if user.is_authenticated and user.username %}
-            <ul class="nav navbar-nav navbar-right">
+<!--		  <button class="btn btn-info lang">Russian</button>
+<button class="btn btn-info lang">Mandarin</button>
+<button class="btn btn-info lang">Japanese</button>
+<button class="btn btn-info lang">Korean</button>
+<button class="btn btn-info lang">Hebrew</button>-->
 
+            <ul class="nav navbar-nav navbar-right">
+				<li style="display:none;" id="searchicon"><a class="navside" href="/home"><span class="glyphicon glyphicon-search"></span></a></li>
               <li><a class="navside" href="/config"><span class="glyphicon glyphicon-cog"></span></a></li>
               <li><a class="navside" ><span class="glyphicon glyphicon-user"></span><b> {{ user.username }}</b></a></li>
               <li><a class="navside" href="/logout"><span class="glyphicon glyphicon-log-out"></span><b> Logout</b></a></li>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+	<title>Demo Content</title>
         <style>
-		
 			.vis-hidden {
 				border: 0;
 				clip: rect(0 0 0 0);
@@ -33,7 +33,7 @@
             body{
                 font-family: sans-serif;
 				
-		background-color:#1e88e5;           
+		background-color:#1e88e5 !important;           
  }
             .main{
                 //border: 2px solid black;
@@ -140,14 +140,49 @@
 		background:yellowgreen!important;
 		color:honeydew!important;
 		}
+		.navside b,.navside span{
+		color:white;
+		}
+		.navbar-default{
+		background-color:#000066 !important;
+		margin-bottom:0px !important;
+		}
+		ul strong{
+color:white;
+font-size:18px;
+margin-top:25px;
+margin-left:10px;
+}
+ul li{
+margin-bottom:5px;
+}
         </style>
 	{% load staticfiles %}
 	{% load get %}
+	    <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/bootstrap.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'crawler/styles/formdesign.css' %}" />
+	<script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
     </head>
     <body>
-	<div>
+	    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+       
+        <div class="collapse navbar-collapse" id="myNavbar">
+
+          {% if user.is_authenticated and user.username %}
+            <ul class="nav navbar-nav navbar-right">
+			<li><a class="navside" href="/home"><span class="glyphicon glyphicon-home"></span></a></li>
+	      <li><a class="navside" href="/news"><span class="glyphicon glyphicon-list-alt"></span></a></li>
+              <li><a class="navside"><span class="glyphicon glyphicon-user"></span><b>{{ user.username }}</b></a></li>
+              <li><a class="navside" href="/logout"><span class="glyphicon glyphicon-log-out"></span><b> Logout</b></a></li>
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+	<div style="margin-top:40px;">
 <div style="float:left;width:300px;position:fixed;height:100%;background:#000066;">
-<form>
+<form onsubmit="return false">
 <div class="options" align="center">
 <div align="center" style="min-width:80%;margin-top:20px;background:#000066;border-radius:10px;border:white;padding:10px;">
 <strong align="center" style="color:white;"><b>Choose Themes</b></strong><br><br>
@@ -157,17 +192,42 @@
 </datalist>
 </div>
 </div>
-<div style="overflow:scroll;height:100%;position:absolute;">
+<div style="margin-bottom:20px;overflow:scroll;height:100%;position:absolute;">
 {% for key,value in categories.items %}
 <div class="duplicate" value="{{key|cut:' '}}" id="dup_{{key|cut:' '}}" style="display:block;">{{key}}</div>
 {% endfor %}
 </div>
 </form>
 </div>
-	<div class="main" style="margin-left:300px;">
-            <h2>Configuration</h2>
+<div id="ubuntubar" style="overflow:scroll;right:0px;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
+<ul style="margin-bottom:30px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+
+{% for key,value in options.items %}
+<li style="display:inline-flex;" class="personalize"><img src='{% if value|slice:"1" == 'c' %}{% static value %}{% else %}{{value}}{% endif %}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+{% endfor %}
+</ul>
+</div>
+<script>
+$("#ubuntubar").hover(function(){
+$("#ubuntubar").css("width","350px");
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar").css("width","100px");
+$('.scard').css('z-index','0');
+});
+$("li").hover(function(){
+$(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
+$(this).find('strong').show();
+$(this).css('cursor','pointer');
+},function(){
+$(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
+$(this).find('strong').hide();
+});
+</script>
+	<div class="main" style="margin-left:300px;margin-right:100px;">
+            <h2 style="text-align:center;"><b style="color:white;">Configuration</b></h2>
 <div>
-<b>&nbspMy prioritized configurations</b>
+<b style="text-align:center;color:white;">&nbspMy prioritized configurations</b>
 <div style="overflow:scroll;height:150px;width:100%;margin-right:10px;margin-top:5px;border-radius:10px;box-shadow:10px 10px 5px #888888;background:white;">
 <table id="prioritytable" style="margin:5px;width:99%;height:93%;" align="center">
 <tr id="noselect" align="center">
@@ -179,11 +239,12 @@
 
 			<form action="./add_config" method="post" id="mainform">
             <div class="options" align="center" style="margin-top:20px;">
-  <div style="background:burlywood;display:none;"><input type="text" id="addtheme" list="suggestMore" autocomplete="off" name="query"> <datalist id="suggestMore">
+  <div style="background:burlywood;"><input type="text" id="themeinput" style="display:inline;" list="suggestMore" autocomplete="off" name="query"> <datalist id="suggestMore">
                                 </datalist>
 
-<div style="display:none;">Add Theme</div></div>
-                <div id="adder" style="background:burlywood;">Add selection to my prioritized configuration</div>
+<div style="display:inline;white-space:nowrap" id="addkeyword">Add Keyword</div></div>
+                <div id="adder" style="background:burlywood;">Add selection to list</div>
+				<div id="remover" style="background:burlywood;">Delete selection from list</div>
 				<input type="hidden" name="priorities" id="hiddendata"/>
 				<button type="submit" value="Submit" onclick="sendpriorities()">Submit</button>
 				{% csrf_token %}
@@ -195,10 +256,14 @@
                     <div>{{key}}</div>
                 </div>
 			<div class="rightSideBar">
+			{% if value|length > 0 %}
 			{% for j in value %}
-                   <div><img src='{{subcategoryimg|get:key|get:j}}' width='100px' height='100px' alt='{{ subcategoryimg.key }}'><br><input id="cat_{{key|cut:' '}}_{{j|cut:' '}}" type="checkbox" name="cat_{{key|cut:' '}}_{{j|cut:' '}}" class="vis-hidden new-post-tags" value="{{key}}__{{j}}" />
+                   <div><img src='{% if subcategoryimg|get:key|get:j|slice:"1" == 'c' %}{% static subcategoryimg|get:key|get:j %}{% else %}{{subcategoryimg|get:key|get:j}}{% endif %}' width='100px' height='100px' alt='{{ subcategoryimg.key }}'><br><input id="cat_{{key|cut:' '}}_{{j|cut:' '}}" type="checkbox" name="cat_{{key|cut:' '}}_{{j|cut:' '}}" class="vis-hidden new-post-tags" value="{{key}}__{{j}}" />
                                                 <label for="cat_{{key|cut:' '}}_{{j|cut:' '}}">{{j}}</label></div>
 			{% endfor %}
+			{% else %}
+				<div>Currently no sub-categories found! But You can add them using Add Keyword!</div>
+			{% endif %}
 			</div>
 			</div>
             </div>
@@ -206,11 +271,11 @@
             </form>
         </div>
 		</div>
-<script src="{% static 'crawler/scripts/jquery-1.10.2.js' %}"></script>
 <script src="{% static 'crawler/scripts/jquery.nicescroll.js' %}"></script>
+    <script src="{% static 'crawler/scripts/bootstrap.js' %}"></script>
 <script>
-console.log("Autocomplete does not work");
-var bar2=document.getElementById("addtheme");
+$(".duplicate").last().css('margin-bottom','200px');
+var bar2=document.getElementById("themeinput");
                     $(bar2).on('input',myFunction2());
 
  function myFunction2() {
@@ -380,7 +445,9 @@ if($(this).find('input:checkbox:checked').length>0){
 });
 if($('#cat_'+id).css('display')=='none'){
 $('[id^=cat_]').hide();
+$('[id^=cat_]').removeClass('current');
 $('#cat_'+id).show();
+$('#cat_'+id).addClass('current');
 if($('#cat_'+id).find('input:checkbox:checked').length>0){
 	$(this).css({'background':'yellowgreen','color':'honeydew'});
 }
@@ -390,6 +457,7 @@ else{
 }
 else{
 $('#cat_'+id).hide();
+$('#cat_'+id).removeClass('current');
 if($('#cat_'+id).find('input:checkbox:checked').length<1){
 	$(this).css({'background':'#000066','color':'white'});
 }
@@ -402,6 +470,37 @@ function sendpriorities(){
 $("#hiddendata").val(JSON.stringify(positions));
 $("#mainform").submit();
 }
+$('#addkeyword').on('click',function(){
+	var keyword=$('#themeinput').val();
+	if(keyword.length>0){
+		var a=$('.current .leftSideBar div').html();
+		console.log("started");
+		$.ajax({
+			url:"/add_keyword",
+			type:"GET",
+			data:"theme="+a+"&keyword="+keyword,
+			success:function(response){
+			var obj=$.parseJSON(response);
+			if(obj.success=="true"){
+				var keywordmarkup="<div><img src='https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png' width='100px' height='100px' alt=''><br><input id='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' type='checkbox' name='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' class='vis-hidden new-post-tags' value='"+a+"__"+keyword+"' style=''><label for='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"'>"+keyword+"</label></div>";
+				if($('#cat_'+a.replace(/ /g,'')+" .rightSideBar div").first().html().slice(0,9)=="Currently"){
+					$('#cat_'+a.replace(/ /g,'')+" .rightSideBar").html(keywordmarkup);
+				}
+				else{
+				$('#cat_'+a.replace(/ /g,'')+" .rightSideBar").prepend(keywordmarkup);
+				}
+				$('#cat_'+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')).prevAll('img').first().click(function(){
+					$(this).nextAll('label').first().trigger('click');
+				});
+				console.log("successs");
+			}
+			else{
+				console.log("error");
+			}
+			},
+		});
+	}
+});
 </script>
     </body>
     <html>

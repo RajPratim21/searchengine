@@ -4,6 +4,7 @@ from django import forms
 import re
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist,MultipleObjectsReturned
+from django.core.validators import URLValidator
 from django.db import models
 
 # Create your models here.
@@ -34,4 +35,8 @@ class RegistrationForm(forms.Form):
 		if password1 == password2:
 			return password2
 		raise forms.ValidationError('Passwords do not match.')
-
+		
+class Domain(models.Model):
+    domain=models.CharField(max_length=2000,validators=[URLValidator()])
+    def __str__(self):
+        return self.domain

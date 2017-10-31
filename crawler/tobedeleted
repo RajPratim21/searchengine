@@ -1,8 +1,7 @@
-import urllib2
-from pymongo import MongoClient
-from bs4 import BeautifulSoup
-import json
-def myfunction(query):
+import urllib,Image,cStringIO
+#from pymongo import MongoClient
+
+"""def myfunction(query):
     def get_soup(url,header):
         return BeautifulSoup(urllib2.urlopen(urllib2.Request(url,headers=header)),'html.parser')
 
@@ -16,22 +15,28 @@ def myfunction(query):
                 link , Type =json.loads(a.text)["ou"]  ,json.loads(a.text)["ity"]
                 ActualImages.append((link,Type))
     for i , (img , Type) in enumerate( ActualImages[0:2]):
-            return img
-client=MongoClient()
-db=client.test
-col=db.configlist
-cur=col.find()
-categories={}
-for i in cur:
-	categories[i["Category"]]=i["Subcategories"]
-subcatimg={}
-with open("subcatimglinks",'w') as fd:
-	for key,value in categories.items():
-		for i in value:
-			try:
-				subcatimg[key+"__"+i]=myfunction(i)
-				print key,"__",i," : ",subcatimg[key+"__"+i]
-				fd.write(key+"__"+i+" : ")
-				fd.write(subcatimg[key+"__"+i]+"\n")
-			except:
-				print "cud not ",i
+            return img"""
+def myfunction2(URL,line):
+	try:
+		file = cStringIO.StringIO(urllib.urlopen(URL).read())
+		img = Image.open(file).convert('RGB')
+		height = 100
+		width = 100
+		img=img.resize((width, height), Image.ANTIALIAS)
+		return img
+	except:
+		print line
+		return -1
+
+with open("subcatimglinks1",'r') as fd,open("subcatimglinks2","w") as fd1:
+	for line in fd:
+		line=line.split(" : ")
+		img=myfunction2(line[1],line[0])
+		if img==-1:
+			fd1.write(line[0]+" : "+line[1])
+			continue
+		name="static/crawler/media/"+str(line[0])+".jpg"
+		name1="crawler/media/"+str(line[0])+".jpg"
+		print name
+		img.save(name)
+		fd1.write(line[0]+" : "+name1+"\n")

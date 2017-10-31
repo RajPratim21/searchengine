@@ -168,14 +168,15 @@ overflow:hidden;
 {% load get %}
 {% if user.is_authenticated and user.username %}
 <div id="ubuntubar" style="overflow:scroll;direction:rtl;float:left;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
-<ul style="direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+<ul style="margin-bottom:30px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
 
 {% for key,value in options.items %}
-<li style="display:inline-flex;" class="personalize"><img src='{{value}}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+<li style="display:inline-flex;" class="personalize"><img src='{% if value|slice:"1" == 'c' %}{% static value %}{% else %}{{value}}{% endif %}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
 {% endfor %}
 </ul>
 </div>
 <script>
+$('#searchicon').show();
 $("#ubuntubar").hover(function(){
 $("#ubuntubar").css("width","350px");
 $('.scard').css('z-index','-1');
@@ -222,18 +223,22 @@ $(this).find('strong').hide();
                                   <img class="imgs" src="{{row.img}}">
                                 </div>
                                 <div class="card-content" style="height:100%;">
-                                 <p ><b>{{row.header}}</b></p>
+                                <p ><b>{{row.header}}</b></p>
+				<p class="date">{{row.date}}</p>
+
                                 </div>
 			<div class="mask">
 			<img src="{{row.img}}" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span>
       <a href='{{row.link}}' target="_blank"><h4 class="alink">{{row.header}}</h4>
-      <p id="just">{{row.data|trim|truncatechars:500}}</p>
+     
+<p class="date"><br>{{row.date}}</br></p>
+ <p id="just">{{row.data|trim|truncatechars:500}}</p>
     </div>
                               </div></a></div>
                         <br/>
                     </div>
 
-                {% endfor %}>
+                {% endfor %}
 
 </div>
     <br/>
@@ -259,8 +264,24 @@ $(this).css('color','black');
 else{
 $(this).css('color','red');
 }
-// write custom function for onclick addition to db
+var link=$(this).parent().find('a').attr('href');
+
+$.ajax({
+url:"/liked_card",
+type:"GET",
+data:"card="+link,
+success:function(response){
+var obj=$.parseJSON(response);
+if(obj.success=="true"){
+console.log("sucess");
+}
+else{
+console.log("error");
+}
+},
 });
+});
+
 $('.mask .glyphicon').hover(function(){
 if($(this).css('color')!='rgb(255, 0, 0)'){
 $(this).css('color','grey');
@@ -278,8 +299,33 @@ $(this).css('color','black');
 else{
 $(this).css('color','red');
 }
-// write custom function for onclick addition to db
+
+// wrote custom function for onclick addition to db
+var link=$(this).parent().find('a').attr('href');
+
+$.ajax({
+url:"/liked_card",
+type:"GET",
+data:"card="+link,
+success:function(response){
+var obj=$.parseJSON(response);
+if(obj.success=="true"){
+console.log("sucess");
+}
+else{
+console.log("error");
+}
+},
 });
+});
+for(var i in likedlinks){
+	$('.mask').each(function(){
+		if($(this).find('a').attr('href')==likedlinks[i]){
+			$(this).find('span').css('color','red');
+		}
+	});
+};
+
 }
 $('.scard').hover(function(){
 $('.scard').not(this).css('-webkit-filter','brightness(50%)');
@@ -339,6 +385,7 @@ $(this).find('img').css('margin-left','0px');
 								currentquery=query;
 								page=resp["page"];
 								var url=document.location.href.split("?")[0];
+								url=url.split("#")[0];
 								window.history.pushState('',document.titile,url);
 								$('#nextpage').attr('href','#page='+(page+1).toString());
 								
@@ -348,10 +395,13 @@ $(this).find('img').css('margin-left','0px');
 								
 								$('#prevpage').attr('onclick',"prevpagefunction()");
 								
+								
 								abcd();
 							}
 							$("body").css({'background':'#1e88e5','z-index':'0'});
+							$("#ubuntubar").css('width','100px');
 							$("#loadingimage").hide();
+							
 			}
                          }
 });
@@ -379,7 +429,16 @@ function prevpagefunction(){
 		$("#nextbtn").prop('disabled',false);
 		}
 	}
-								
+var likedlinks=[{% for i in likedlinks %}'{{i}}',{% endfor %}];
+$(document).ready(function(){
+for(var i in likedlinks){
+	$('.mask').each(function(){
+		if($(this).find('a').attr('href')==likedlinks[i]){
+			$(this).find('span').css('color','red');
+		}
+	});
+}
+});				
 </script>
 
 {% endblock %}

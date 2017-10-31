@@ -132,11 +132,18 @@ background-color:#000066;
 .navside b,.navside span{
 color:white;
 }
-ul strong{
+#ubuntubar ul strong{
 color:white;
 font-size:18px;
 margin-top:25px;
 margin-left:10px;
+}
+#ubuntubar2 ul strong{
+color:white;
+font-size:18px;
+margin-top:10px;
+margin-left:10px;
+cursor:pointer;
 }
 ul li{
 margin-bottom:5px;
@@ -148,10 +155,18 @@ overflow:hidden;
 </style>
 {% load get %}
 <div id="ubuntubar" style="overflow:scroll;direction:rtl;float:left;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
-<ul style="direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+<ul style="margin-bottom:30px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
 
 {% for key,value in options.items %}
-<li style="display:inline-flex;" class="personalize"><img src='{{value}}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+<li style="display:inline-flex;" class="personalize"><img src='{% if value|slice:"1" == 'c' %}{% static value %}{% else %}{{value}}{% endif %}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
+{% endfor %}
+</ul>
+</div>
+<div id="ubuntubar2" style="overflow:scroll;right:0px;;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
+<p style="width:1px;word-wrap:break-word;white-space:pre-wrap;color:white;margin-left:40px;margin-top:50px;" id="recommendations">SEARCH RECOMMENDATIONS</p><ul style="margin-bottom:50px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+
+{% for key,value in options.items %}
+<li style="display:inline-flex;" class="personalize2"><strong style="display:none;">{{key}}</strong></li>
 {% endfor %}
 </ul>
 </div>
@@ -164,7 +179,7 @@ $('.scard').css('z-index','-1');
 $("#ubuntubar").css("width","100px");
 $('.scard').css('z-index','0');
 });
-$("li").hover(function(){
+$("#ubuntubar li").hover(function(){
 $(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
 $(this).find('strong').show();
 $(this).css('cursor','pointer');
@@ -172,19 +187,51 @@ $(this).css('cursor','pointer');
 $(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
 $(this).find('strong').hide();
 });
-$("li").click(function(){
-var url=document.location.href.split("/")[0];
+$("#ubuntubar li").click(function(){
+var url=document.location.href;
+//url=url.replace(window.location.pathname,"");
+url=url.split("?")[0];
 var theme=$(this).find('strong').html();
-window.location.href="http://13.92.42.105/:8000/news?theme="+theme;
+var query=$('#searchtext').val();
+if(query.length<1){
+window.history.pushState('',document.titile,url+"?theme="+theme);
+}
+else{
+window.location.href=url+"?query="+query+"&theme="+theme;
+}
+});
+
+$("#ubuntubar2").hover(function(){
+$("#ubuntubar2").css("width","350px");
+$(".personalize2 strong").show();
+$("#recommendations").hide();
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar2").css("width","100px");
+$('.scard').css('z-index','0');
+$(".personalize2 strong").hide();
+$("#recommendations").show();
+});
+
+$(".personalize2 strong").hover(function(){
+$(this).css("color","rgb(250, 255, 20)");
+},function(){
+$(this).css("color","white");
+});
+
+$(".personalize2 strong").click(function(){
+var a=$(this).html().split("/")[0];
+$("#searchtext").val($("#searchtext").val()+" "+a);
+$("#searchform").submit();
 });
 </script>
-<div style="margin-left:100px;margin-top:60px;">
+<div style="margin-left:100px;margin-top:60px;margin-right:100px;">
         <div class="container" style="margin-top:20px;">
         <div class="row">
             <div class="col-md-6 col-md-offset-3" style="text-align: center">
                 <img src='{% static "crawler/media/exaro.png" %}' style="margin-top: 20px"/>
             </div>
-             <form class="col-md-6 col-md-offset-3" method=get>
+             <form class="col-md-6 col-md-offset-3" method="get" id="searchform">
                 <div class="input-group">
                     <br/>
                     <br/>
@@ -230,7 +277,7 @@ window.location.href="http://13.92.42.105/:8000/news?theme="+theme;
                     }
                 </script>
                 <br/>
-                <div class="container " style="text-align:center;">
+                <!--<div class="container " style="text-align:center;">
                     <select name="theme" class="selectpicker " data-style="btn-info">
                         <option value="all">All Themes</option>
                         <option value="tech">Technology</option>
@@ -243,7 +290,7 @@ window.location.href="http://13.92.42.105/:8000/news?theme="+theme;
 
                     </select>
    		 
-                </div>
+                </div>-->
 
             </form>
             </div>
@@ -356,6 +403,10 @@ $(this).find('.mask').css('transition','all 0s linear');
 $(this).find('.imgs').css({'-webkit-transform':'scale(1)','transform':'scaleY(1)','opacity':'1'});
 $(this).find('.card-content').css({'-webkit-transform':'scale(1)','transform':'scale(1)','display':'block'});
 
+});
+$('.lang').on('click',function(){
+var url=window.location.href;
+window.location.href=url+"?lang="+$(this).html();
 });
 </script>
 {% endblock %}

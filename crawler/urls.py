@@ -15,8 +15,8 @@ urlpatterns = [
 	url(r'^config/$', views.configuration,name='config_page'),
 	url(r'^newsagri/$', views.newsagri,name='newsagri'),
 	url(r'^newsenv/$', views.newsenv,name='newsenv'),
-	url(r'^newsai/$', views.newsai,name='newsai'),
+	#url(r'^newsai/$', views.newsai,name='newsai'),
 	url(r'^news/$', views.news,name='newsenergy'),
-	#url(r'^temppage$',views.temppage,name='temppagee'),
-	#url(r'^get_themes$',views.get_themes,name='get_themes'),
+	url(r'^liked_card$',views.liked_card,name='liked_card'),
+	url(r'^add_keyword$',views.add_keyword,name='add_keyword'),
 ]
