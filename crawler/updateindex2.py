@@ -27,6 +27,38 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 #from searchengine.settings import B
 #from searchengine.settings import E
 from pymongo import MongoClient
+import networkx as nx
+from nltk.corpus import stopwords
+G=nx.DiGraph()
+stop_words = set(stopwords.words('english'))
+
+with open("/searchengine/searchengine/categoryAndTheirSubcategories",'r') as edges:
+
+    for line in edges:
+        line=line.rstrip()
+        data1=[]
+        data2=[]
+        d1_string=''
+        d2_string=''
+        toks=line.split('\t')
+        list1 = toks[0].split('_')
+        for word in list1:
+            if word not in stop_words:
+                #data1.append(word)
+                d1_string=d1_string+' '+word
+        d1_string = d1_string[1:]
+
+        list2 = toks[1].split('_')
+        for word in list2:
+            if word not in stop_words:
+                #data2.append(word)
+                d2_string=d2_string+' '+word
+        d2_string = d2_string[1:]
+        #tech_file.write(d2_string.lower()+' '+d1_string.lower()+"\n")
+        #print d2_string.lower(), d1_string.lower()
+        G.add_edge(d2_string.lower(),d1_string.lower())
+        #G.add_edge(d1_string.lower(),d2_string.lower())
+
 
 from operator import itemgetter
 
@@ -57,7 +89,32 @@ def build_vocab(sentences):
     wordlist = []
     for i in sentences:
 	words = word_tokenize(i)
+	words2 = []
+	#print "words",words
+	if len(words)==2:
+		     bi = words[0] + " " + words[1]
+                     print bi
+                     words2.append(bi)
+	if len(words)>2:
+		for i,j in enumerate(words[0:-2]):
+			print j
+			bi = words[i] + " " + words[i+1]
+			print bi
+			words2.append(bi)
+	if len(words)==3:
+		     tri = words[0] + " " + words[1] + " " + words[2]
+                     print tri
+                     words2.append(tri) 
+	if len(words)>2:
+                for i,j in enumerate(words[0:-3]):
+			print j
+                        tri = words[i] + " " + words[i+1] + " " + words[i+2] 
+                        print tri
+			words2.append(tri)
+
 	wordlist1.extend(words)
+	wordlist1.extend(words2)
+	print "words2",words2
     lemmatizer = WordNetLemmatizer()
     wordlist1 = [lemmatizer.lemmatize(token) for token in wordlist1]
    
@@ -69,7 +126,7 @@ def build_vocab(sentences):
     wordfreq = [wordlist.count(p) for p in wordlist]
     #sorted(wordfreq,key=itemgetter(1))
     result = list(set(zip(wordlist, wordfreq)))
-    result = sorted(result,key=itemgetter(1))
+    result = sorted(result,key=itemgetter(1), reverse=True)
     return result
 
 
@@ -81,209 +138,36 @@ def find_history(user):
         for hist in Scursor:
                 print hist['history']
                 list_word= hist['history']
+		for val in list_word:
+			print val
+			bigrams = ngrams(val, 1)
+			for key in bigrams:
+				print key
         #print "list_word",list_word
-	return build_vocab(list_word)
+	reclist= build_vocab(list_word)
+	paternlist=[]
+	for key in reclist:
+		val = key[0]	
+		paternlist.append(val)
+		if val in G:
+                	iterval =G.successors_iter(val)
+			counter=0
+                	for neb in iterval:
+				if  counter<=10:
+					paternlist.appemd(neb)
+					counter=counter+1
+
+	return paternlist
+                        
 
 
-def find_config(user):
-	client = MongoClient()
-	db = client.test
-	Scursor = db.SearchHistory.find({'user':user})
-	#search_hist = []
-	for hist in Scursor:
-	        print hist['history']
-	        list_word= hist['history']
-	print "list_word",list_word
-	#csur= db.LikedPosts.find()
-	#for dc in csur:
-	#	print dc
-	cursor = db.config.find()
-	user_id=0
-	for doc in cursor:
-		if user==doc['user']:
-			break
-		user_id =user_id+1 
-	#print user_id
-	URL=[]
-	
-	cursor = db.config.find({'user':user})
-	for document in cursor:
-	
-		for key in document['choice']:
-			#print 'dssd'
-			doccat = 'doc'+key.lower().replace(' ','_')
-			#print doccat
-			URL.append(("http://localhost:9200/"+doccat+"/_search?size=1000&q=*:*",key,doccat))
-			doccat2 = 'doc'+key.lower().replace(' ','')
-			#print doccat2
-                	URL.append(("http://localhost:9200/"+doccat2+"/_search?size=1000&q=*:*",key,doccat2))
-
-			for val in document['choice'][key]:
-				#print key.lower().replace(' ','_')+val.lower().replace(' ','_')
-				doccatsubcat = doccat+val.lower().replace(' ','_')
-				try:    
-					r = requests.get(url = "http://localhost:9200/"+doccatsubcat+"/_search?size=1000&q=*:*")
-					rdata = r.json()
-					#print rdata
-        				data = rdata['hits']['hits']
-					#print doccatsubcat
-	            			URL.append(("http://localhost:9200/"+doccatsubcat+"/_search?size=1000&q=*:*",key+' '+val,doccatsubcat))
-				except:
-					continue
-
-	if len(list_word)>10:
-                list_word = list_word[-10:]
-	#print list_word, "dscscs@@@@@@@@@@@@"        
-			
-	myquery ={
-                     "query":
-                            {
-
-                                                "multi_match":
-                                                        {
-                                                          "query": " ".join(list_word),
-                                                          "fields": [ "data", "header" ]
-                                                        }
-
-
-                          },
-                        "from" : 0, "size" : 100
-                        }
-               
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-	result = es.search(index="_all", body=myquery)
-        max_score =0
-        for rows in result['hits']['hits']:
-        	if max_score<rows['_score']:
-                	 max_score=rows['_score']
-        for rows in result['hits']['hits']:
-        	score =( rows['_score']/max_score)*0.5
-                if len(rows['_source']['scores'])>user_id:
-                	rows['_source']['scores'][user_id] =rows['_source']['scores'][user_id]+ score
-                else:
-                	for i in range(user_id):
-                       		rows['_source']['scores'].append(0.15)
-             	        rows['_source']['scores'].append(0.15+score)
-                jsondata = rows['_source'] #json.dumps(dict1, ensure_ascii=False)
-                es.index(index='doc'+user.lower() +'home', doc_type='peopleimg', id=rows['_source']['link'],body=jsondata)
-
-	print URL
-	for i in URL:
-		myquery ={
-	                 "query":
-        	                {
-	
-        	                                "multi_match":
-                	                                {
-                                	                  "query": " ".join(list_word),
-                        	                          "fields": [ "data", "header" ]
-                                        	        }
-
-
-                      	  },	
-                	"from" : 0, "size" : 100
-        		}
-		try:
-			es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-			
-
-
-			result = es.search(index=i[2], body=myquery)
-			max_score =0
-			for rows in result['hits']['hits']:
-				if max_score<rows['_score']:
-					max_score=rows['_score']
-			for rows in result['hits']['hits']:
-				#print rows['_source']['header']
-				score =( rows['_score']/max_score)*0.5
-        			
-				if len(rows['_source']['scores'])>user_id:
-        	        		rows['_source']['scores'][user_id] =rows['_source']['scores'][user_id]+ score
-                           
-        	        	else:
-        	        		for i in range(user_id):
-        	                		rows['_source']['scores'].append(0.15)
-       		               		rows['_source']['scores'].append(0.15+score)
-				jsondata = rows['_source'] #json.dumps(dict1, ensure_ascii=False)
-                                       
-        	        	es.update(index=i[2], doc_type='peopleimg', id=rows['_source']['link'],body={"doc":jsondata})
-
-		except Exception as e:
-			pass #print e
-	'''
-    	for i in URL:
-		try:
-	    		print '#$$##############', i
-			# sending get request and saving the response as response object
-            		r = requests.get(url = i[0])
-            		#from newclassify import classifier
-            		import math
-
-            		stop_words = set(stopwords.words('english'))
-
-            		client = MongoClient()
-            		db = client.test
-            		cursor = db.config.find()
-        
-            		es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-            		# extracting data in json format
-            		rdata = r.json()
-            		data = rdata['hits']['hits']
-            		for d in  data:
-                		try:
-     		            		score = 0.0
-                            		#print d['_source']['header']
-                            		da = d['_source']['data']
-                            		text=''
-                            		scoredict={}
-                            		for word in list_word:
-                                		try:
-                                        		#if len(word)!=0 or str(word)!='\n' or str(word)!='\t':
-                                            		#text=text+str(word)
-
-                                            		if word.lower() in da:
-                                                		score = score + 0.01
-                                		except Exception as e:
-                                        		pass
-                                
-                    
-                                
-                            		if len(d['_source']['scores'])>user_id:
-                                		d['_source']['scores'][user_id] =d['_source']['scores'][user_id]+ score
-                            
-                            		else:
-						for i in range(user_id):
-                                    			d['_source']['scores'].append(0.25)
-						d['_source']['scores'].append(0.25+score)
-                                    
-                	    		d['_source']['flagindex'] = i[1]
-                                        #dict_list[user] = d['_source']['scores'] 
-                            		jsondata = d['_source'] #json.dumps(dict1, ensure_ascii=False)
-                            		#print "Inserting"
-                            		es.update(index=i[2], doc_type='peopleimg', id=d['_source']['link'],body={"doc":jsondata})
-                		except Exception as e:
-	                		print e
-		except Exception as e:
-    			print e
-	'''
 	#return dict_list
 likecur = db.LikedPosts.find()
 for doc in likecur:
 	print doc
-Scursor = db.SearchHistory.find({'user':'asd'})
+Scursor = db.SearchHistory.find({'user':'testuser'})
 #for i in Scursor:
 #	print i
-x = find_history('asd')
+x = find_history('testuser')
 print "x:",x
-import time
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-
-if True:
-	for doc in Scursor:
-	#if True:
-		#print doc['user']
-		es.indices.delete(index='doc'+ doc['user']+'home', ignore=[400, 404])
-		find_config( doc['user'])
-		#time.sleep(2)
-	time.sleep(5)
