@@ -165,7 +165,7 @@ overflow:hidden;
 <div id="ubuntubar2" style="overflow:scroll;right:0px;;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
 <p style="width:1px;word-wrap:break-word;white-space:pre-wrap;color:white;margin-left:40px;margin-top:50px;" id="recommendations">SEARCH RECOMMENDATIONS</p><ul style="margin-bottom:50px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
 
-{% for key,value in options.items %}
+{% for key in search_patern %}
 <li style="display:inline-flex;" class="personalize2"><strong style="display:none;">{{key}}</strong></li>
 {% endfor %}
 </ul>
@@ -214,15 +214,25 @@ $("#recommendations").show();
 });
 
 $(".personalize2 strong").hover(function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
 $(this).css("color","rgb(250, 255, 20)");
+}
 },function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
 $(this).css("color","white");
+}
 });
 
 $(".personalize2 strong").click(function(){
 var a=$(this).html().split("/")[0];
-$("#searchtext").val($("#searchtext").val()+" "+a);
-$("#searchform").submit();
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$("#searchtext").val($.trim($("#searchtext").val()+" "+a));
+$(this).css("color","rgb(0, 255, 0)");
+}
+else{
+//$("#searchtext").val($.trim($("#searchtext").val().replace(a,"")));
+//$(this).css("color","white");
+}
 });
 </script>
 <div style="margin-left:100px;margin-top:60px;margin-right:100px;">
@@ -324,7 +334,7 @@ $("#searchform").submit();
 </div>-->
 
       <div class="table-hover" style="margin-top:30px;">
-            {% for row in feed.articles %}
+            {% for row in feed %}
                     <div class="col-md-4 col-xs-12 scard pull-right">
 
                         <div class="rowarticle">
