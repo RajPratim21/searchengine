@@ -80,6 +80,18 @@ li:hover li a:hover
     background: #95A9B1;
 }
    drop down style */
+
+
+#ubuntubar2 ul strong{
+color:white;
+font-size:18px;
+margin-top:10px;
+margin-left:10px;
+cursor:pointer;
+}
+
+
+
 .scard h2 {
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
   background: transparent;
@@ -175,6 +187,21 @@ overflow:hidden;
 {% endfor %}
 </ul>
 </div>
+
+
+<div id="ubuntubar2" style="overflow:scroll;right:0px;;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
+<p style="width:1px;word-wrap:break-word;white-space:pre-wrap;color:white;margin-left:40px;margin-top:50px;" id="recommendations">SEARCH RECOMMENDATIONS</p><ul style="margin-bottom:50px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
+
+{% for key in search_patern %}
+<li style="display:inline-flex;" class="personalize2"><strong style="display:none;">{{key}}</strong></li>
+{% endfor %}
+
+
+
+
+</ul>
+</div>
+
 <script>
 $('#searchicon').show();
 $("#ubuntubar").hover(function(){
@@ -214,7 +241,7 @@ $(this).find('strong').hide();
 	<br/>
     <div class="container" id="personalizenews">
 
-			 {% for row in feed.articles %}
+			 {% for row in feed %}
                     <div class="col-md-4 col-xs-12 scard pull-right">
 
                         <div class="rowarticle">
@@ -438,7 +465,39 @@ for(var i in likedlinks){
 		}
 	});
 }
-});				
+});	
+
+$("#ubuntubar2").hover(function(){
+$("#ubuntubar2").css("width","350px");
+$(".personalize2 strong").show();
+$("#recommendations").hide();
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar2").css("width","100px");
+$('.scard').css('z-index','0');
+$(".personalize2 strong").hide();
+$("#recommendations").show();
+});
+$(".personalize2 strong").hover(function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$(this).css("color","rgb(250, 25, 20)");
+}
+},function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$(this).css("color","white");
+}
+});
+$(".personalize2 strong").click(function(){
+var a=$(this).html().split("/")[0];
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$("#searchtext").val($.trim($("#searchtext").val()+" "+a));
+$(this).css("color","rgb(0, 255, 0)");
+}
+else{
+//$("#searchtext").val($.trim($("#searchtext").val().replace(a,"")));
+//$(this).css("color","white");
+}
+});			
 </script>
 
 {% endblock %}
