@@ -56,7 +56,7 @@ with open('sorted_Tech.txt') as file:
 
 techembedingMatrix=[]
 
-def classifier(data,text1, T):
+def classifier(data,text1, T,writeflag,docname):
 	words=word_tokenize(data)
 
 
@@ -95,6 +95,7 @@ def classifier(data,text1, T):
         try:
 		bigrams2 = ngrams(data, 4)
         	#print "fourgrams"
+		#print bigrams2
         	for grams in bigrams2:
 			#print grams
         		if T.get(grams[0]+' '+grams[1]+' '+grams[2]+' '+grams[3],"not_exsist")!="not_exsist":
@@ -123,6 +124,7 @@ def classifier(data,text1, T):
         	bigrams2 = ngrams(data, 1)
         	#print "unigrams"
         	for grams in bigrams2:
+			#print grams
         		if  T.get(grams[0],"not_exsist")!="not_exsist":
         			TechList.append(grams[0])
                 	        tech_count=tech_count+1
@@ -154,10 +156,10 @@ def classifier(data,text1, T):
         techmatrixlist1=[]
         intkvar=0
         entitity_list = Techentitity_list
-        print len(entitity_list)
+        #print entitity_list
        	if len(entitity_list)<=5:
 		return 0.000	
-	with open('likefile.txt') as f:
+	with open('likedocfiles/'+docname+'.txt') as f:
             for line in f:
                     techmatrixlist1.append(line.rstrip().split(' ')[1:])
 			
@@ -173,7 +175,15 @@ def classifier(data,text1, T):
 	
         k=0
         j=0
-        #likefile = open('likefile.txt','a')
+	linecount=0
+	if writeflag:
+		with open('likedocfiles/'+docname+'.txt') as f:
+			for  line in f:
+				linecount=linecount+1
+			if linecount>100:
+				likefile = open('likedocfiles/'+docname+'.txt','w')
+			else:
+				likefile = open('likedocfiles/'+docname+'.txt','a')
 	
         with open('Technology_file.txt_latest.emd_sorted') as f:
             if len(entitity_list)>0:
@@ -186,11 +196,15 @@ def classifier(data,text1, T):
 
                                     while k==int(entitity_list[j])and j<len(entitity_list)-1:
                                             j=j+1
-                                            #likefile.write(my_line)
+					    if writeflag:		    
+                                            	likefile.write(my_line)
+					    
                                             techembedingMatrix.append(my_line.rstrip().split(' ')[1:])
                             k=k+1
-	
-        floattechmatrix=[]
+	if writeflag:
+		return  'done writing'
+        
+	floattechmatrix=[]
 	
         for row in techembedingMatrix:
             floatrow=[]

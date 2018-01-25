@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 #from stack_spider import StackSpider
 import urlparse
-from script2 import scrape 
+ 
 from nltk.util import ngrams
 from nltk.corpus import wordnet
 from nltk import word_tokenize
@@ -61,13 +61,13 @@ sys.setdefaultencoding('utf8')
 #domain = args['domain']
 
 # list of available indices
-index_list = ["2017-39"]
+index_list = ["2017-34","2017-39","2017-30"]
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 stop_words = set(stopwords.words('english'))
 
 
 G=nx.DiGraph()
-'''
+''' 
 with open("categoryAndTheirSubcategories",'r') as edges:
 
     for line in edges:
@@ -91,29 +91,11 @@ with open("categoryAndTheirSubcategories",'r') as edges:
                 d2_string=d2_string+' '+word
         d2_string = d2_string[1:]
         #tech_file.write(d2_string.lower()+' '+d1_string.lower()+"\n")
-        #print d2_string.lower(), d1_string.lower()
+       #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
 ''' 
 
-#list_1 = scrape(n=50, local='category',sub_local='Business/Energy/Oil_and_Gas')
-domain_list=[]
-count=0
-
-
-domain_list.append(sys.argv[1])
-
-
-'''
-domain_list = ["breitbart-news.com","business-insider.com","business-insider-uk.com","buzzfeed.com","cnbc.com","cnn.com","daily-mail.com","der-tagesspiegel.com","die-zeit.com","engadget.com","entertainment-weekly.com","espn-cric-info.com","espn.com","financial-times.com","football-italia.com","focus.com","four-four-two.com","fortune.com","fox-sports.com","google-news.com","gruenderszene.com","hacker-news.com","handelsblatt.com","ign.com","independent.com","mashable.com","metro.com","mirror.com","mtv-news.com","mtv-news-uk.com","national-geographic.com","new-scientist.com","newsweek.com","new-york-magazine.com","polygon.com","recode.com","reddit-r-all.com","reuters.com","spiegel-online.com","t3n.com","talksport.com","techradar.com","the-economist.com","the-guardian-au.com","the-guardian-uk.com","the-hindu.com","the-huffington-post.com","the-lad-bible.com","the-new-york-times.com","the-next-web.com","the-sport-bible.com","the-telegraph.com","the-verge.com","the-wall-street-journal.com","the-washington-post.com","usa-today.com","time.com","wired-de.com","wirtschafts-woche.com"]
-'''
-
-
-
-import urllib2
-from bs4 import BeautifulSoup
-import json
-def get_soup_img(url,header):
-    return BeautifulSoup(urllib2.urlopen(urllib2.Request(url,headers=header)),'html.parser')
+domain_list= [   "Businessinsider.com","Bloomberg.com", "Springer.com","Reuters.com","Latimes.com", "Nbcnews.com", "Chron.com","Chinadaily.com.cn",  "Wsj.com", "Investopedia.com", "Money.cnn.com","Nypost.com","Nytimes.com" ,"Discover.com","Investing.com","Cbsnews.com","Cnet.com", "Mediafire.com", "Livejournal.com" ,"techcrunch.com",   "Variety.com", "Theguardian.com", "Bbc.co.uk/news/", "News.yahoo.com", "Indiatimes.com", "Foxnews.com", "Timesofindia.indiatimes.com",     "abc-news-au.com","al-jazeera-english.com","ars-technica.com","associated-press.com","bbc-news.com","bbc-sport.com","bild.com","bloomberg.com","breitbart-news.com","business-insider.com","business-insider-uk.com","buzzfeed.com","cnbc.com","cnn.com","daily-mail.com","der-tagesspiegel.com","die-zeit.com","engadget.com","entertainment-weekly.com","espn-cric-info.com","espn.com","financial-times.com","football-italia.com","focus.com","four-four-two.com","fortune.com","fox-sports.com","google-news.com","gruenderszene.com","hacker-news.com","handelsblatt.com","ign.com","independent.com","mashable.com","metro.com","mirror.com","mtv-news.com","mtv-news-uk.com","national-geographic.com","new-scientist.com","newsweek.com","new-york-magazine.com","polygon.com","recode.com","reddit-r-all.com","spiegel-online.com","t3n.com","talksport.com","techradar.com","the-economist.com","the-guardian-au.com","the-guardian-uk.com","the-hindu.com","the-huffington-post.com","the-lad-bible.com","the-new-york-times.com","the-next-web.com","the-sport-bible.com","the-telegraph.com","the-verge.com","the-wall-street-journal.com","the-washington-post.com","usa-today.com","time.com","wired-de.com","wirtschafts-woche.com"]
 
 for domain in domain_list:
     def search_domain(domain):
@@ -215,43 +197,46 @@ for domain in domain_list:
 
         parser = BeautifulSoup(html_content)
         links = parser.find_all("a")
-        #docdate = info.getheader('date'0
-	all_texts = parser.find_all("p")
+        all_texts = parser.find_all("p")
         img = parser.find_all("img")
-	all_imgs =[]
+        all_imgs =[]
+
         #header = data.title.string
         #all_texts = all_texts[0]
         #print(all_texts)
         #print(len(all_texts))
-        for j in range(len(img)):
-	    all_imgs.append(img[j].attrs.get("src"))
-            #print all_imgs
-        allstr=""
-        for i in range(len(all_texts)):	
-            all_links = all_texts[i].find_all("a")
-            for links in all_links:
-                cleanr = re.compile('<.*?>')
-                all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
-                cleanr = re.compile('<script>.*?</script>')
-                all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
+       	try:
+	    for j in range(len(img)):
+           	 all_imgs.append(img[j].attrs.get("src"))
+           	 #print all_imgs
+       	    allstr=""
+            for i in range(len(all_texts)):	
+            	all_links = all_texts[i].find_all("a")
+            	for links in all_links:
+            	    cleanr = re.compile('<.*?>')
+            	    all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
+            	    cleanr = re.compile('<script>.*?</script>')
+            	    all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
                     
             #print(all_texts[i])
-        for i in range(len(all_texts)):
-            cleanr = re.compile('<.*?>')
-            all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
-            allstr = allstr+" "+ all_texts[i]
-            #print all_texts[i]
-        #print all_texts
-        try:
-            #print image					
-            if len(all_imgs)>0:
-		image = all_imgs[0]
+     	    for i in range(len(all_texts)):
+           	 cleanr = re.compile('<.*?>')
+          	 all_texts[i] = re.sub(cleanr, '', str(all_texts[i]))
+           	 allstr = allstr+" "+ all_texts[i]
+           	 #print all_texts[i]
+            #print all_texts
+       
+            #print image
+	    if len(all_imgs)!=0:					
+            	image = all_imgs[0]	
 	    else:
-		image =""
+		image=''
             header = parser.title.string
             print header
-            allstr= allstr.lower().encode(sys.stdout.encoding, errors='replace')
+	    allstr=allstr.lower()
+            #print allstr
 	    '''
+            allstr= allstr.lower().encode(sys.stdout.encoding, errors='replace')
             words = word_tokenize(allstr)
 
             #print(words)
@@ -430,39 +415,44 @@ for domain in domain_list:
                 indexvar="Other category"
 
             #print '$$$$$$$$$$$ '+ keyword[i] +' ####################'
-            '''
-	    if len(allstr)>180:
+            if len(allstr)>180:
                 sumary =allstr[0:180]
-            else:
-		sumary = allstr
-	    query= str(header).split()
-            query='+'.join(query)
-
-            print query
-            imgurl="https://www.google.co.in/search?q="+query+"&source=lnms&tbm=isch"
-            headerapi={'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36"}
-            soup = get_soup_img(imgurl, headerapi)
-            ActualImages = []
-            for a in soup.find_all("div",{"class":"rg_meta"}):
-            	link , Type =json.loads(a.text)["ou"]  ,json.loads(a.text)["ity"]
-                ActualImages.append((link,Type))
-
-            #print '####################### ',ActualImages
-
-            jpg_img = []
-            for i in ActualImages:
-            	print i
-                i=i[0]
-                if (i.split('.')[-1] == 'jpg' or i.split('.')[-1] == 'png'):
-                	print i
-                        jpg_img.append(i)
-                        break
-	    imagenew =jpg_img[0]
-	    dict1= {"scores":[],"link":mainurl ,"data": allstr,"header":header,"votes":0.5, "entity": [], "flagindex":sys.argv[3], "sum": sumary, "img": imagenew, 'date':''}
+            dict1= {"scores":[],"link":mainurl ,"data": allstr,"header":header,"votes":0.8, "entity": entity_list, "flagindex":indexvar, "sum": sumary, "img": image}
             data = json.dumps(dict1, ensure_ascii=False)
-            es.index(index=sys.argv[2], doc_type='peopleimg', id=mainurl,body=json.loads(data))
-   	    print 'doen', sys.argv[2]  
-       	 
+            '''
+            ''' 
+            if keyword[0] in indexvar:
+                    es.index(index='doctechnology', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[1] in indexvar:
+                    es.index(index='docbusiness', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[2] in indexvar:
+                    es.index(index='docwm', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[3] in indexvar:
+                    es.index(index='docagri', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[4] in indexvar:
+                    es.index(index='docsports', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[5] in indexvar:
+                    es.index(index='docenergy', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[6] in indexvar:
+                    es.index(index='docpeople', doc_type='peopleimg', id=url,body=json.loads(data))
+            if keyword[7] in indexvar:
+                    es.index(index='docent', doc_type='peopleimg', id=url,body=json.loads(data))
+            if "Other category" == indexvar:
+                    es.index(index='docothers', doc_type='peopleimg', id=url,body=json.loads(data))
+            '''
+          
+            if BeautifulSoup(urllib.urlopen("http://data.alexa.com/data?cli=10&dat=s&url="+ mainurl), "xml")!=None:
+                alexa_score = BeautifulSoup(urllib.urlopen("http://data.alexa.com/data?cli=10&dat=s&url="+ mainurl), "xml").find("REACH")['RANK']
+            else:
+                alexa_score = 99999999
+            import math
+            dict1= {"scores":[],"link":mainurl ,"data": allstr,"header":header,"votes":1/(1+math.log10(int(alexa_score))), "entity": [], "flagindex":'Other category', "sum": "", "img": image}
+            data = json.dumps(dict1, ensure_ascii=False)
+            
+            es.index(index='docothers', doc_type='peopleimg', id=mainurl,body=json.loads(data))
+            print 'done'
+
+        
         except Exception as e2:
             print str(e2),'exception 1'
                     
@@ -493,12 +483,9 @@ for domain in domain_list:
 
     record_list = search_domain(domain)
     link_list   = []
-    counter = 0 
+
     for record in record_list:
-        counter =counter+1
-	print '//////\\\\\\', counter
-	#if counter==50:
-	#	break
+        
         html_content = download_page(record)
         
         print "[*] Retrieved %d bytes for %s" % (len(html_content),record['url'])
@@ -506,7 +493,7 @@ for domain in domain_list:
         link_list = extract_external_links(html_content,link_list, record['url'])
         
     print "[*] Total external links discovered: %d" % len(link_list)
-    '''
+
     with codecs.open("%s-links.csv" % domain,"wb",encoding="utf-8", errors='ignore') as output:
 
         fields = ["URL"]
@@ -517,4 +504,4 @@ for domain in domain_list:
         for link in link_list:
             logger.writerow({"URL":link})
 
-    '''
+

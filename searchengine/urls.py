@@ -15,9 +15,19 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
+#from django.contrib.auth import views as auth_views
+#from django.contrib.auth.models import User
+#import myadmin
+#admin.site.unregister(User)
+#admin.site.register(User, myadmin.CustomUserAdmin)
+
+
+#admin.site.basesite_template='admin/base_site1.html'
+admin.autodiscover()
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+		
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('crawler.urls')),
-    url(r'^search/', include('search.urls')),
+    url(r'^search/', include('search.urls'))
 ]

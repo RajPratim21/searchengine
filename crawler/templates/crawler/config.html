@@ -216,17 +216,25 @@ $("#ubuntubar").css("width","100px");
 $('.scard').css('z-index','0');
 });
 $("li").hover(function(){
-$(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
+$(this).find("img").not(".selectedimg").css({'margin-left':'5px','border':'2px solid'});
 $(this).find('strong').show();
 $(this).css('cursor','pointer');
 },function(){
-$(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
+$(this).find('img').not(".selectedimg").css({'margin-left':'0px','border':'2px solid white'});
 $(this).find('strong').hide();
+});
+$("#ubuntubar li").click(function(){
+	$("#ubuntubar li").find('img').css("border","2px solid");
+	$("#ubuntubar li").find('img').removeClass("selectedimg");
+	$("#ubuntubar li").removeClass('selectedtheme');
+	$(this).find('img').css("border","4px solid yellow");
+	$(this).find('img').addClass("selectedimg");
+	$(this).addClass('selectedtheme');
 });
 </script>
 	<div class="main" style="margin-left:300px;margin-right:100px;">
             <h2 style="text-align:center;"><b style="color:white;">Configuration</b></h2>
-<div>
+<!--<div>
 <b style="text-align:center;color:white;">&nbspMy prioritized configurations</b>
 <div style="overflow:scroll;height:150px;width:100%;margin-right:10px;margin-top:5px;border-radius:10px;box-shadow:10px 10px 5px #888888;background:white;">
 <table id="prioritytable" style="margin:5px;width:99%;height:93%;" align="center">
@@ -235,19 +243,16 @@ $(this).find('strong').hide();
 </tr>
 </table>
 </div>
-</div>
+</div>-->
 
-			<form action="./add_config" method="post" id="mainform">
+			<form id="mainform" onsubmit="return false">
             <div class="options" align="center" style="margin-top:20px;">
-  <div style="background:burlywood;"><input type="text" id="themeinput" style="display:inline;" list="suggestMore" autocomplete="off" name="query"> <datalist id="suggestMore">
-                                </datalist>
+  <div style="background:burlywood;width:300px;"><input type="text" id="themeinput" style="display:inline;" list="suggestMore" autocomplete="off" name="query">
 
-<div style="display:inline;white-space:nowrap" id="addkeyword">Add Keyword</div></div>
+<div style="display:inline;white-space:nowrap;" id="addkeyword">Add Keyword</div></div>
                 <div id="adder" style="background:burlywood;">Add selection to list</div>
 				<div id="remover" style="background:burlywood;">Delete selection from list</div>
 				<input type="hidden" name="priorities" id="hiddendata"/>
-				<button type="submit" value="Submit" onclick="sendpriorities()">Submit</button>
-				{% csrf_token %}
             </div>
 			{% for key,value in categories.items %}
 			<div class="wrapper">
@@ -271,7 +276,7 @@ $(this).find('strong').hide();
             </form>
         </div>
 		</div>
-<script src="{% static 'crawler/scripts/jquery.nicescroll.js' %}"></script>
+<!--<script src="{% static 'crawler/scripts/jquery.nicescroll.js' %}"></script>-->
     <script src="{% static 'crawler/scripts/bootstrap.js' %}"></script>
 <script>
 $(".duplicate").last().css('margin-bottom','200px');
@@ -301,16 +306,54 @@ var bar2=document.getElementById("themeinput");
                     }
 </script>
 <script>
-function nicescrolling(){
+/*function nicescrolling(){
 $("#prioritytable").parent().getNiceScroll().resize();
 };
+
 $(function() {  
     $("#prioritytable").parent().niceScroll({cursorcolor:"#00F",cursoropacitymin: 0.5,autohidemode: false,cursordragontouch: true,cursorwidth: "10px"});
-});
+});*/
+
 var positions={};
 $('#adder').click(function(){
 positions={};
-$("#prioritytable tr").not("#noselect").remove();
+var bool=false;
+var temp=[];
+$(".current .rightSideBar").find("input").each(function(){
+if($(this).prop('checked')==true){
+temp.push($(this).next("label").html()+"/"+$(".current .leftSideBar div").html());
+bool=true;
+}
+});
+var a=$(".current .leftSideBar div").html();
+if(typeof a != 'undefined'){
+if(bool){
+positions[a]=temp;
+}
+else{
+positions[a]=[];
+}
+$.ajax({
+			url:"/add_config",
+			type:"POST",
+			asyn:false,
+			data:{
+				positions:JSON.stringify(positions),
+				csrfmiddlewaretoken:'{{csrf_token}}'
+			},
+			success:function(response){
+			var obj=$.parseJSON(response);
+			if(obj.success=="true"){
+				console.log("success");
+				location.reload();
+			}
+			else{
+				console.log("error");
+			}
+			},
+		});
+		}
+/*$("#prioritytable tr").not("#noselect").remove();
 $("#prioritytable").css({'width':'99%','height':'auto'});
 var bool=false;
 var markup="";
@@ -336,11 +379,37 @@ console.log(positions);
 }
 bool=false;
 markup="";
-nicescrolling();
-});
+});*/
 });
 
-var source;
+
+
+$('#remover').click(function(){
+var item=$('.selectedtheme strong').html();
+if(typeof item != 'undefined'){
+$.ajax({
+			url:"/add_config",
+			type:"POST",
+			asyn:false,
+			data:{
+				item:item,
+				csrfmiddlewaretoken:'{{csrf_token}}'
+			},
+			success:function(response){
+			var obj=$.parseJSON(response);
+			if(obj.success=="true"){
+				console.log("success");
+				location.reload();
+			}
+			else{
+				console.log("error");
+			}
+			},
+		});
+		}
+});
+
+/*var source;
 var target;
 var sourcename;
 function dragstart_handler(ev){
@@ -398,7 +467,7 @@ function dragend_handler(ev){
 if(source==target){
 $(ev.target).remove();
 }
-}
+}*/
 </script>
 <script>
             var bar=document.getElementById("searchtext");
@@ -474,6 +543,7 @@ $('#addkeyword').on('click',function(){
 	var keyword=$('#themeinput').val();
 	if(keyword.length>0){
 		var a=$('.current .leftSideBar div').html();
+		if(typeof a != 'undefined'){
 		console.log("started");
 		$.ajax({
 			url:"/add_keyword",
@@ -482,16 +552,22 @@ $('#addkeyword').on('click',function(){
 			success:function(response){
 			var obj=$.parseJSON(response);
 			if(obj.success=="true"){
-				var keywordmarkup="<div><img src='https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png' width='100px' height='100px' alt=''><br><input id='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' type='checkbox' name='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' class='vis-hidden new-post-tags' value='"+a+"__"+keyword+"' style=''><label for='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"'>"+keyword+"</label></div>";
+				var keywordmarkup="<div><img src='https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png' width='100px' height='100px' alt=''><br><input id='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' type='checkbox' name='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"' class='vis-hidden new-post-tags addedkeyword' value='"+a+"__"+keyword+"' style=''><label for='cat_"+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')+"'>"+keyword+"</label></div>";
 				if($('#cat_'+a.replace(/ /g,'')+" .rightSideBar div").first().html().slice(0,9)=="Currently"){
 					$('#cat_'+a.replace(/ /g,'')+" .rightSideBar").html(keywordmarkup);
 				}
 				else{
+				var boo=false;
+				$('#cat_'+a.replace(/ /g,'')+" .rightSideBar").find('.addedkeyword').each(function(){
+					if($(this).nextAll('label').first().html()==keyword){bool=true;}
+				});
+				if( bool==false ){
 				$('#cat_'+a.replace(/ /g,'')+" .rightSideBar").prepend(keywordmarkup);
 				}
 				$('#cat_'+a.replace(/ /g,'')+"_"+keyword.replace(/ /g,'')).prevAll('img').first().click(function(){
 					$(this).nextAll('label').first().trigger('click');
 				});
+				}
 				console.log("successs");
 			}
 			else{
@@ -499,6 +575,7 @@ $('#addkeyword').on('click',function(){
 			}
 			},
 		});
+		}
 	}
 });
 </script>

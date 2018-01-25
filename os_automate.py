@@ -1,7 +1,22 @@
 import subprocess
 import os
-list_url = ["techcrunch.com","abc-news-au.com","ars-technica.com","associated-press.com","bbc-news.com","bbc-sport.com","bild.com","bloomberg.com","breitbart-news.com","business-insider.com","business-insider-uk.com","buzzfeed.com","cnbc.com","daily-mail.com","der-tagesspiegel.com","die-zeit.com","engadget.com","entertainment-weekly.com","espn-cric-info.com","financial-times.com","football-italia.com","focus.com","four-four-two.com","fortune.com","fox-sports.com","google-news.com","gruenderszene.com","hacker-news.com","handelsblatt.com","ign.com","independent.com","mashable.com","metro.com","mirror.com","mtv-news.com","mtv-news-uk.com","national-geographic.com","new-scientist.com","newsweek.com","new-york-magazine.com","polygon.com","recode.com","reddit-r-all.com","reuters.com","spiegel-online.com","t3n.com","talksport.com","techradar.com","the-economist.com","the-guardian-au.com","the-guardian-uk.com","the-hindu.com","the-huffington-post.com","the-huffington-post.com","the-lad-bible.com","the-new-york-times.com","the-next-web.com","the-sport-bible.com","the-telegraph.com","the-telegraph.com","the-verge.com","the-wall-street-journal.com","the-washington-post.com","usa-today.com","time.com","wired-de.com","wirtschafts-woche.com"]
-for i in list_url:
-	#os.system("python news_feed2.py");
-	#os.system("python commoncrawl.py -d " +  i)
-	subprocess.call("python"," commoncrawl.py", "-d"  ,"i")
+from pymongo import MongoClient
+client = MongoClient()
+db = client.test
+cursor = db.configlist.find()
+for document in cursor:
+	print(document)
+	'''
+	for key in document['choice']:
+		print key
+		#os.system("python alexacrawl.py " + 'Computers/'+ key.replace(' ','_'))
+		#os.system("python alexacrawl.py " + 'Business/'+ key.replace(' ','_'))
+		#os.system("python alexacrawl.py " + 'Science/'+ key.replace(' ','_'))
+
+		for value  in document['choice'][key]:
+			print  value
+			os.system("python alexacrawl.py " + 'Computers/'+ key.replace(' ','_') +'/'+value.replace(' ','_'))
+			os.system("python alexacrawl.py " + 'Business/'+ key.replace(' ','_')+'/'+value.replace(' ','_'))
+			os.system("python alexacrawl.py " + 'Science/'+ key.replace(' ','_')+'/'+value.replace(' ','_'))
+
+	'''

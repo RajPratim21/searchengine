@@ -1,11 +1,19 @@
+
+import urllib2
 import requests
 from bs4 import BeautifulSoup
+def get_soup_img(url,header):
+    return BeautifulSoup(urllib2.urlopen(urllib2.Request(url,headers=header)),'html.parser')
+import urlparse
+
+def is_absolute(url):
+    return bool(urlparse.urlparse(url).netloc)
 
 
 
 import urllib
 
-
+from random import shuffle
 
 import re
 
@@ -107,12 +115,14 @@ def duck_lets_go(query):
 		#print i[1]
 		data["data"] = i[2]
 		#print i[2]
+		data['img']='https://www.cleverfiles.com/howto/wp-content/uploads/2016/08/mini.jpg'
 		data_list.append(data)
 	tp = zip(header,links,texts)
 	#print zip(*tp)[:2]
 	return data_list
 
 def duck_lets_go2(query):
+	#print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', query
 	api_url = "https://duckduckgo.com/html/?q=" + query + "&format=json"
 	#query_url = api_url %query
 	response = requests.get(api_url)
@@ -126,7 +136,7 @@ def duck_lets_go2(query):
 	header = []
 
 	images = []
-
+	#print '#####################'
 	for i in all_headers:
 	
 		cleanr = re.compile('<.*?>')
@@ -136,7 +146,7 @@ def duck_lets_go2(query):
 	  	header.append(i)
 	
 	#print header
-
+	
 
 	all_texts = data.find_all("a",{"class":"result__snippet"})
 
@@ -198,23 +208,61 @@ def duck_lets_go2(query):
 		links.append(i)
 
 
-	all_imgs = data.find_all("img",{"class":"result__icon__img"})
+	#all_imgs = data.find_all("img",{"class":"result__icon__img"})
  	imgs = []
+	'''
 	for i in all_imgs:
 		i = i.get("src")
 		i = "https:" + i
 		imgs.append(i)
 	#print imgs
-	data_list=[]    
-	for i in zip(header,links,texts,imgs):
+	'''
+	data_list=[]
+	'''
+	query= str(query).split()
+        query='+'.join(query)
+        print 'd$$$$$$$$$'
+        print "ye rahii queryyy",query
+        imgurl="https://www.google.com/search?q="+query+"&source=lnms&tbm=isch"
+        headerapi={'User-Agent':"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.134 Safari/537.36"}
+        soup = get_soup_img(imgurl, headerapi)
+        ActualImages = []
+        for a in soup.find_all("div",{"class":"rg_meta"}):
+                link , Type =json.loads(a.text)["ou"]  ,json.loads(a.text)["ity"]
+                ActualImages.append((link,Type))
+	jpg_img = []
+        for i in ActualImages:
+                     #print i
+  		     i=i[0]                 
+                     if (i.split('.')[-1] == 'jpg' or i.split('.')[-1] == 'png'):
+                                   #print i
+                                    jpg_img.append(i)
+                                   #break
+	
+	print "dekhhho ",jpg_img
+	'''
+	import subprocess
+	import sys
+  	#if 'Oil' in query:
+	#	query = "Natural gas extraction"	
+	val= subprocess.check_output(['python3 msimage.py '+ query ], shell=True)
+	jpg_img=val.split('\n')
+    	try:
+    	   while len(jpg_img)<len(header):
+		jpg_img.extend(shuffle(jpg_img))
+        except:
+            print "nonetype not iterable"
+		
+	for i in zip(header,links,texts,jpg_img):
 		data = {}
 		data["header"] = i[0]
 		#print i[0]
-		data["links"] = i[1]
+		data["link"] = i[1]
 		#print i[1]
-		data["sum"] = i[2]
+		data["data"] = i[2]
 		#print i[2]
 		data["img"] = i[3]
+		#print data["img"]
 		data_list.append(data)
 	tp = zip(header,links,texts)
 	#print zip(*tp)[:2]

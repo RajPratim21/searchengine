@@ -28,12 +28,15 @@ with open("categoryAndTheirSubcategories",'r') as edges:
         #tech_file.write(d2_string.lower()+' '+d1_string.lower()+"\n")
         #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
-
+	G.add_edge(d1_string.lower(),d2_string.lower())
 
 while True:
 	print 'Enter'
 	val = raw_input()
 	if val in G:
 		print 'exsist'
+		iter =G.successors_iter(val)
+		for neb in iter:
+			print neb
 	else: 
 		print 'not'

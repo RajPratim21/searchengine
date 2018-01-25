@@ -35,6 +35,8 @@ stop_words = set(stopwords.words('english'))
 stop_words = set(stopwords.words('english'))
 
 idx =0
+
+
 T =ahocorasick.Automaton()
 B =ahocorasick.Automaton()
 E =ahocorasick.Automaton()
@@ -45,14 +47,11 @@ G=nx.DiGraph()
 stop_words = set(stopwords.words('english'))
 i=0
 
-
 with open("categoryAndTheirSubcategories",'r') as edges:
 
     for line in edges:
         line=line.rstrip()
         idx=idx+1
-  	if idx == 200:
-            break
 	data1=[]
         data2=[]
         d1_string=''
@@ -75,7 +74,7 @@ with open("categoryAndTheirSubcategories",'r') as edges:
         #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
 
-'''
+"""
 with open('FinalrankingMapfile') as file:
     for line in file:
       idx=idx+1
@@ -162,19 +161,34 @@ with open('sorted_Energy.txt') as file:
                     valstr = valstr+tokens[x]
                 else:
                     valstr = valstr+tokens[x]+" "
-            E.add_word(valstr.lower(), (line.split('\t')[0],valstr.lower()))
-'''
+            E.add_word(valstr.lower(), (line.split('\t')[0],valstr.lower()))"""
+
 print "done till hhere"
 # SECURITY WARNING: don't run with debug turned on in production!
+
+
 DEBUG = True
+
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'testbobxpo@gmail.com'
+EMAIL_HOST_PASSWORD = 'noreplybob'
+DEFAULT_FROM_EMAIL = 'testbobxpo@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+
 
 ALLOWED_HOSTS = []
 
-SITE_ID = "597fb8b29565734e4223cb35"
-
+#SITE_ID = "597fb8b29565734e4223cb35"
+SITE_ID="5a087668956573e3c7df5740"
 # Application definition
 
 INSTALLED_APPS = [
+    'crawler',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -182,7 +196,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'crawler'
+    'djangotoolbox',
 ]
 
 MIDDLEWARE = [
@@ -197,10 +211,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'searchengine.urls'
 
+print os.path.join(BASE_DIR,'crawler/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'crawler/templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -212,6 +227,11 @@ TEMPLATES = [
         },
     },
 ]
+
+TEMPLATE_LOADERS=(
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 
 WSGI_APPLICATION = 'searchengine.wsgi.application'
 

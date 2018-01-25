@@ -31,88 +31,217 @@ from pymongo import MongoClient
 from newclassify import classifier
 import math
 
-URL=[]
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+
 import json
 # location given here
 location = "delhi technological university"
 
-list_word = ['awesome','artificial', 'intelligence','chatbot', 'business','kaggle','ai', 'tensorflow']
+list_word = ['artificial', 'intelligence']
 client = MongoClient()
 db = client.test
 
 #db.users.deleteOne( { status: "D" } )
 Scursor = db.SearchHistory.find()
-for hist in Scursor:
-	print hist
 
-cursor = db.config.find({'user':'asd'})
-for document in cursor:
-	 for key in document['choice']:
-		doccat = 'doc'+key.lower().replace(' ','_')
-		URL.append(("http://localhost:9200/"+doccat+"/_search?size=1000&q=*:*",key,doccat))
-		for val in document['choice'][key]:
-			print key.lower().replace(' ','_')+val.lower().replace(' ','_')
-			doccatsubcat = doccat+val.lower().replace(' ','_')
-                	URL.append(("http://localhost:9200/"+doccatsubcat+"/_search?size=1000&q=*:*",key+' '+val,doccatsubcat))
+search_hist = []
 
-raw_input("Stop") 
 
-# defining a params dict for the parameters to be sent to the API
-PARAMS = {'address':location}
-for i in URL:
-# sending get request and saving the response as response object
-        r = requests.get(url = i[0])
-        #from newclassify import classifier
-        import math
-
-        stop_words = set(stopwords.words('english'))
-
-        client = MongoClient()
-        db = client.test
-        cursor = db.config.find()
-        for document in cursor:
-                print document['choice']
+def find_config(user):
+	client = MongoClient()
+	db = client.test
+	Scursor = db.SearchHistory.find({'user':user})
+	#search_hist = []
+	for hist in Scursor:
+	        print hist['history']
+	        list_word= hist['history']
+	print list_word
+	#csur= db.LikedPosts.find()
+	#for dc in csur:
+	#	print dc
+	cursor = db.config.find()
+	user_id=0
+	for doc in cursor:
+		if user==doc['user']:
+			break
+		user_id =user_id+1 
+	#print user_id
+	URL=[]
 	
-	es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-       	# extracting data in json format
-        rdata = r.json()
-        data = rdata['hits']['hits']
-        for d in  data:
-        	try:
-			score = 0.0
-                        #print d['_source']['header']
-                        da = d['_source']['data']
-                        text=''
-                        scoredict={}
-                        for word in list_word:
-                               try:
-                               		#if len(word)!=0 or str(word)!='\n' or str(word)!='\t':
-                                        #text=text+str(word)
+	cursor = db.config.find({'user':user})
+	for document in cursor:
+	
+		for key in document['choice']:
+			#print 'dssd'
+			doccat = 'doc'+key.lower().replace(' ','_')
+			#print doccat
+			URL.append(("http://localhost:9200/"+doccat+"/_search?size=1000&q=*:*",key,doccat))
+			doccat2 = 'doc'+key.lower().replace(' ','')
+			#print doccat2
+                	URL.append(("http://localhost:9200/"+doccat2+"/_search?size=1000&q=*:*",key,doccat2))
 
-                                        if word.lower() in da:
-						#print 'boom', word
-                                        	score = score + 0.01
-					#print score
-                               except Exception as e:
-                                	pass
-                        	
-				
-                        	
-                        if len(d['_source']['scores'])>0:
-                        	d['_source']['scores'][0] =d['_source']['scores'][0]+ score
-						
-                        else:
-                                d['_source']['scores'].append(score+0.26)
+			for val in document['choice'][key]:
+				#print key.lower().replace(' ','_')+val.lower().replace(' ','_')
+				doccatsubcat = doccat+val.lower().replace(' ','_')
+				try:    
+					r = requests.get(url = "http://localhost:9200/"+doccatsubcat+"/_search?size=1000&q=*:*")
+					rdata = r.json()
+					#print rdata
+        				data = rdata['hits']['hits']
+					#print doccatsubcat
+	            			URL.append(("http://localhost:9200/"+doccatsubcat+"/_search?size=1000&q=*:*",key+' '+val,doccatsubcat))
+				except:
+					continue
+
+	if len(list_word)>10:
+                list_word = list_word[-10:]
+	#print list_word, "dscscs@@@@@@@@@@@@"        
+			
+	myquery ={
+                     "query":
+                            {
+
+                                                "multi_match":
+                                                        {
+                                                          "query": " ".join(list_word),
+                                                          "fields": [ "data", "header" ]
+                                                        }
+
+
+                          },
+                        "from" : 0, "size" : 100
+                        }
+               
+        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+	result = es.search(index="_all", body=myquery)
+        max_score =0
+        for rows in result['hits']['hits']:
+        	if max_score<rows['_score']:
+                	 max_score=rows['_score']
+        for rows in result['hits']['hits']:
+        	score =( rows['_score']/max_score)*0.5
+                if len(rows['_source']['scores'])>user_id:
+                	rows['_source']['scores'][user_id] =rows['_source']['scores'][user_id]+ score
+                else:
+                	for i in range(user_id):
+                       		rows['_source']['scores'].append(0.15)
+             	        rows['_source']['scores'].append(0.15+score)
+                jsondata = rows['_source'] #json.dumps(dict1, ensure_ascii=False)
+                es.index(index='doc'+user.lower() +'home', doc_type='peopleimg', id=rows['_source']['link'],body=jsondata)
+
+	print URL
+	for i in URL:
+		myquery ={
+	                 "query":
+        	                {
+	
+        	                                "multi_match":
+                	                                {
+                                	                  "query": " ".join(list_word),
+                        	                          "fields": [ "data", "header" ]
+                                        	        }
+
+
+                      	  },	
+                	"from" : 0, "size" : 100
+        		}
+		try:
+			es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+			
+
+
+			result = es.search(index=i[2], body=myquery)
+			max_score =0
+			for rows in result['hits']['hits']:
+				if max_score<rows['_score']:
+					max_score=rows['_score']
+			for rows in result['hits']['hits']:
+				#print rows['_source']['header']
+				score =( rows['_score']/max_score)*0.5
+        			
+				if len(rows['_source']['scores'])>user_id:
+        	        		rows['_source']['scores'][user_id] =rows['_source']['scores'][user_id]+ score
+                           
+        	        	else:
+        	        		for i in range(user_id):
+        	                		rows['_source']['scores'].append(0.15)
+       		               		rows['_source']['scores'].append(0.15+score)
+				jsondata = rows['_source'] #json.dumps(dict1, ensure_ascii=False)
+                                       
+        	        	es.update(index=i[2], doc_type='peopleimg', id=rows['_source']['link'],body={"doc":jsondata})
+
+		except Exception as e:
+			pass #print e
+	'''
+    	for i in URL:
+		try:
+	    		print '#$$##############', i
+			# sending get request and saving the response as response object
+            		r = requests.get(url = i[0])
+            		#from newclassify import classifier
+            		import math
+
+            		stop_words = set(stopwords.words('english'))
+
+            		client = MongoClient()
+            		db = client.test
+            		cursor = db.config.find()
+        
+            		es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+            		# extracting data in json format
+            		rdata = r.json()
+            		data = rdata['hits']['hits']
+            		for d in  data:
+                		try:
+     		            		score = 0.0
+                            		#print d['_source']['header']
+                            		da = d['_source']['data']
+                            		text=''
+                            		scoredict={}
+                            		for word in list_word:
+                                		try:
+                                        		#if len(word)!=0 or str(word)!='\n' or str(word)!='\t':
+                                            		#text=text+str(word)
+
+                                            		if word.lower() in da:
+                                                		score = score + 0.01
+                                		except Exception as e:
+                                        		pass
                                 
-			d['_source']['flagindex'] = i[1]
-                        	
-			#es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-                       	#dict1 = {"scores":20.001,"link":'self.url',"data":'text',"header":'heade',"votes":'scores', "entity":'ent_list', "flagindex":'flagindex'}
-                        jsondata = d['_source'] #json.dumps(dict1, ensure_ascii=False)
-                        #print "Inserting"
-                        es.update(index=i[2], doc_type='peopleimg', id=d['_source']['link'],body={"doc":jsondata})
-                except:
-			print "error2"
+                    
+                                
+                            		if len(d['_source']['scores'])>user_id:
+                                		d['_source']['scores'][user_id] =d['_source']['scores'][user_id]+ score
+                            
+                            		else:
+						for i in range(user_id):
+                                    			d['_source']['scores'].append(0.25)
+						d['_source']['scores'].append(0.25+score)
+                                    
+                	    		d['_source']['flagindex'] = i[1]
+                                        #dict_list[user] = d['_source']['scores'] 
+                            		jsondata = d['_source'] #json.dumps(dict1, ensure_ascii=False)
+                            		#print "Inserting"
+                            		es.update(index=i[2], doc_type='peopleimg', id=d['_source']['link'],body={"doc":jsondata})
+                		except Exception as e:
+	                		print e
+		except Exception as e:
+    			print e
+	'''
+	#return dict_list
+likecur = db.LikedPosts.find()
+for doc in likecur:
+	print doc
+Scursor = db.SearchHistory.find()
+import time
 
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-
+if True:
+	for doc in Scursor:
+	#if True:
+		#print doc['user']
+		es.indices.delete(index='doc'+ doc['user']+'home', ignore=[400, 404])
+		find_config( doc['user'])
+		#time.sleep(2)
+	time.sleep(5)

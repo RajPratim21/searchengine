@@ -67,7 +67,7 @@ stop_words = set(stopwords.words('english'))
 
 
 G=nx.DiGraph()
- 
+''' 
 with open("categoryAndTheirSubcategories",'r') as edges:
 
     for line in edges:
@@ -93,12 +93,14 @@ with open("categoryAndTheirSubcategories",'r') as edges:
         #tech_file.write(d2_string.lower()+' '+d1_string.lower()+"\n")
         #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
- 
+''' 
 
 
 #
 # Searches the Common Crawl Index for a domain.
 #
+
+
 def search_domain(domain):
 
     record_list = []

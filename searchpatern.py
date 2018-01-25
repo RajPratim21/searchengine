@@ -23,16 +23,16 @@ import numpy as np
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import sent_tokenize, word_tokenize
 #from searchengine.settings import P
-#from searchengine.settings import G
+#from searchengine.settings import T
 #from searchengine.settings import B
 #from searchengine.settings import E
 from pymongo import MongoClient
 import networkx as nx
 from nltk.corpus import stopwords
-#G=nx.DiGraph()
+G=nx.DiGraph()
 stop_words = set(stopwords.words('english'))
-'''
-with open("/searchengine/searchengine/categoryAndTheirSubcategories",'r') as edges:
+
+with open("categoryAndTheirSubcategories",'r') as edges:
 
     for line in edges:
         line=line.rstrip()
@@ -58,7 +58,7 @@ with open("/searchengine/searchengine/categoryAndTheirSubcategories",'r') as edg
         #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
         #G.add_edge(d1_string.lower(),d2_string.lower())
-'''
+
 
 from operator import itemgetter
 
@@ -87,37 +87,34 @@ search_hist = []
 def build_vocab(sentences):
     wordlist1 = []
     wordlist = []
-    #uni=[]
-    #bi =[]
-    
     for i in sentences:
 	words = word_tokenize(i)
 	words2 = []
 	#print "words",words
 	if len(words)==2:
 		     bi = words[0] + " " + words[1]
-                     #print bi
+                     print bi
                      words2.append(bi)
 	if len(words)>2:
 		for i,j in enumerate(words[0:-2]):
-			#print j
+			print j
 			bi = words[i] + " " + words[i+1]
-			#print bi
+			print bi
 			words2.append(bi)
 	if len(words)==3:
 		     tri = words[0] + " " + words[1] + " " + words[2]
-                     #print tri
+                     print tri
                      words2.append(tri) 
 	if len(words)>2:
                 for i,j in enumerate(words[0:-3]):
-			#print j
+			print j
                         tri = words[i] + " " + words[i+1] + " " + words[i+2] 
-                        #print tri
+                        print tri
 			words2.append(tri)
 
 	wordlist1.extend(words)
 	wordlist1.extend(words2)
-	#print "words2",words2
+	print "words2",words2
     lemmatizer = WordNetLemmatizer()
     wordlist1 = [lemmatizer.lemmatize(token) for token in wordlist1]
    
@@ -129,30 +126,15 @@ def build_vocab(sentences):
     wordfreq = [wordlist.count(p) for p in wordlist]
     #sorted(wordfreq,key=itemgetter(1))
     result = list(set(zip(wordlist, wordfreq)))
-    result2=[]
-    print result
-    for val1 in result:
-	if len(val1[0].split(' '))==1:
-		fcount=val1[1]	
-		for val2 in result:
-			if len(val2[0].split(' '))==2:
-				if val1[0] in val2[0]:
-					fcount =fcount-val2[1]
-		result2.append((val1[0], fcount))
-        else:
-		result2.append(val1)						
-   
-    result = sorted(result2,key=itemgetter(1), reverse=True)
-    #print result
+    result = sorted(result,key=itemgetter(1), reverse=True)
     return result
 
 
-def find_history(user, G):
+def find_history(user):
         client = MongoClient()
         db = client.test
         Scursor = db.SearchHistory.find({'user':user})
         #search_hist = []
-        list_word=[]
         for hist in Scursor:
                 print hist['history']
                 list_word= hist['history']
@@ -162,11 +144,8 @@ def find_history(user, G):
 			for key in bigrams:
 				print key
         #print "list_word",list_word
-        if len(list_word)<1:
-            list_word.append("Business News")
 	reclist= build_vocab(list_word)
 	paternlist=[]
-	
 	for key in reclist:
 		val = key[0]	
 		paternlist.append(val)
@@ -177,45 +156,20 @@ def find_history(user, G):
 				if  counter<=10:
 					paternlist.append(neb)
 					counter=counter+1
-	
+
 	return paternlist
                         
-def find_theme_history(user, G):
-        client = MongoClient()
-        db = client.test
-        Scursor = db.SearchHistory.find({'user':user})
-        #search_hist = []
-        for hist in Scursor:
-                #print hist['themehistory']
-                list_word= hist['themehistory']
-                for val in list_word:
-                        #print val
-                        bigrams = ngrams(val, 1)
-                        for key in bigrams:
-                                print key
-        #print "list_word",list_word
-        reclist= build_vocab(list_word)
-        paternlist=[]
-        for key in reclist:
-                val = key[0]
-                paternlist.append(val)
-                if val in G:
-                        iterval =G.successors_iter(val)
-                        counter=0
-                        for neb in iterval:
-                                if  counter<=10:
-                                        paternlist.append(neb)
-                                        counter=counter+1
 
-        return paternlist
 
-#return dict_list
-#likecur = db.LikedPosts.find()
-#for doc in likecur:
-#	print doc
-#Scursor = db.SearchHistory.find({'user':'testuser'})
+	#return dict_list
+likecur = db.LikedPosts.find()
+for doc in likecur:
+	print doc
+Scursor = db.SearchHistory.find({'user':'testuser'})
 #for i in Scursor:
-#	print i['themehistory']
-#x = find_theme_history('testuser')
-#print "x:",x
+#	print i
+x = find_history('testuser')
+print "x:",x
+
+
 

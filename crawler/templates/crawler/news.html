@@ -179,9 +179,10 @@ overflow:hidden;
 </style>
 {% load get %}
 {% if user.is_authenticated and user.username %}
+
 <div id="ubuntubar" style="overflow:scroll;direction:rtl;float:left;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
 <ul style="margin-bottom:30px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
-
+<button class="btn btn-info" style="background-color:#2C5463" type="button" onclick="selectalltheme()" onsubmit="return false">All</button>
 {% for key,value in options.items %}
 <li style="display:inline-flex;" class="personalize"><img src='{% if value|slice:"1" == 'c' %}{% static value %}{% else %}{{value}}{% endif %}' width='70px' {% if key == selectedcat %}class="selectedcat"{% endif %} height='70px' alt='none' style="border-radius:10px;{% if key == selectedcat %}border:4px solid yellow{% else %}border:2px solid white{% endif %};"><strong style="display:none;">{{key}}</strong></li>
 {% endfor %}
@@ -191,7 +192,7 @@ overflow:hidden;
 
 <div id="ubuntubar2" style="overflow:scroll;right:0px;;width:100px;background:#000066;box-shadow:0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);height:100%;position:fixed;">
 <p style="width:1px;word-wrap:break-word;white-space:pre-wrap;color:white;margin-left:40px;margin-top:50px;" id="recommendations">SEARCH RECOMMENDATIONS</p><ul style="margin-bottom:50px;direction:ltr;white-space:pre;list-style-type:none;list-style:none;padding:10px;text-align:center;">
-
+<button class="btn btn-info" id="patternsubmit" style="display:none;">Submit</button>
 {% for key in search_patern %}
 <li style="display:inline-flex;" class="personalize2"><strong style="display:none;">{{key}}</strong></li>
 {% endfor %}
@@ -203,6 +204,7 @@ overflow:hidden;
 </div>
 
 <script>
+$(".terms").show();
 $('#searchicon').show();
 $("#ubuntubar").hover(function(){
 $("#ubuntubar").css("width","350px");
@@ -211,7 +213,7 @@ $('.scard').css('z-index','-1');
 $("#ubuntubar").css("width","100px");
 $('.scard').css('z-index','0');
 });
-$("li").hover(function(){
+$("#ubuntubar li").hover(function(){
 $(this).find("img").not(".selectedcat").css({'margin-left':'5px','border':'2px solid'});
 $(this).find('strong').show();
 $(this).css('cursor','pointer');
@@ -219,9 +221,130 @@ $(this).css('cursor','pointer');
 $(this).find('img').not(".selectedcat").css({'margin-left':'0px','border':'2px solid white'});
 $(this).find('strong').hide();
 });
+
+$(".personalize2 strong").hover(function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$(this).css("color","rgb(250, 255, 20)");
+}
+},function(){
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$(this).css("color","white");
+}
+});
+
+$(".personalize2 strong").click(function(){
+var a=$(this).html().split("/")[0];
+if($(this).css("color")!="rgb(0, 255, 0)"){
+$("#searchtext").val($.trim($("#searchtext").val()+" "+a));
+$(this).css("color","rgb(0, 255, 0)");
+$(this).addClass("selectedpattern");
+}
+else{
+//$("#searchtext").val($.trim($("#searchtext").val().replace(a,"")));
+$(this).css("color","white");
+$(this).removeClass("selectedpattern");
+}
+});
+$("#ubuntubar2").hover(function(){
+$("#ubuntubar2").css("width","350px");
+$(".personalize2 strong").show();
+$("#patternsubmit").show();
+$("#recommendations").hide();
+$('.scard').css('z-index','-1');
+},function(){
+$("#ubuntubar2").css("width","100px");
+$('.scard').css('z-index','0');
+$(".personalize2 strong").hide();
+$("#patternsubmit").hide();
+$("#recommendations").show();
+});
+$("#patternsubmit").click(function(){
+var patterns="";
+if($(".selectedcat").parent().find('strong').length==0){
+patterns+="Business News"+" ";
+}
+else{
+patterns+=$(".selectedcat").parent().find('strong').html()+" ";
+}
+$(".selectedpattern").each(function(){
+patterns+=$(this).html()+" ";
+});
+if(patterns!=""){
+var jsonFile = new XMLHttpRequest();
+	$("body").css({'background':'white','z-index':'-1'});
+	$("#loadingimage").css('display','flex');
+	var url = "/news?query="+patterns+"&page="+page;
+	jsonFile.open("GET",url,true);
+    jsonFile.send();
+    jsonFile.onreadystatechange = function(){
+    if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+		console.log("gotit");
+		var resp=JSON.parse(jsonFile.responseText);
+        var news = '';
+		if(resp){
+								var c=0;
+								maxpage=resp["maxpage"];
+								for(var i in resp["articles"]){
+									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
+									news+=markup;
+									}
+								document.getElementById('personalizenews').innerHTML = news;
+								currentquery=patterns;
+								counter=resp['counter'];
+								page=resp["page"];
+								var url=document.location.href.split("?")[0];
+								url=url.split("#")[0];
+								window.history.pushState('',document.titile,url);
+								$('#nextpage').attr('href','#page='+(page+1).toString());
+								
+								$('#nextpage').attr('onclick',"nextpagefunc()");
+								
+								$('#prevpage').attr('href','#page='+(page-1).toString());
+								
+								$('#prevpage').attr('onclick',"prevpagefunction()");
+								
+								
+								abcd();
+							}
+							$("body").css({'background':'#1e88e5','z-index':'0'});
+							$("#ubuntubar2").css('width','100px');
+							$("#loadingimage").hide();
+}
+}
+/*$.ajax({
+			url:"/news",
+			type:"GET",
+			asyn:false,
+			data:{
+				query:patterns,
+			},
+			success:function(response){
+			var obj=$.parseJSON(response);
+			if(obj){
+			news="";
+				for(var i in resp["articles"]){
+									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
+									news+=markup;
+									}
+								document.getElementById('personalizenews').innerHTML = news;
+			}
+			else{
+				console.log("error");
+			}
+			},
+		});*/
+}
+});
 </script>
-<div style="margin-left:100px;">
-<div align="center" style="margin-top:60px;" id="google_translate_element"></div>
+<div style="margin-left:100px;margin-right:100px;">
+<div style="text-align:center;margin-top:60px;margin-bottom:10px;">
+<button class="btn btn-info terms" style="margin-top:10px;">Current Trends</button>
+<button class="btn btn-info terms" style="margin-top:10px;">Research</button>
+<button class="btn btn-info terms" style="margin-top:10px;">Company</button>
+<button class="btn btn-info terms" style="margin-top:10px;">Aquisition</button>
+<button class="btn btn-info terms" style="margin-top:10px;">Innovation</button>
+</div>
+<div align="center" style="" id="google_translate_element"></div>
 
 
 
@@ -397,19 +520,15 @@ $(this).find('img').css('margin-left','0px');
 				var resp=JSON.parse(jsonFile.responseText);
                                 var news = '';
 				if(resp){
-                                /*for(var i = 0; i < resp["result"].length; i++)
-                                    options +=resp["result"][i];
-                                document.getElementById('personalizenews').innerHTML = options;*/
 								var c=0;
 								maxpage=resp["maxpage"];
 								for(var i in resp["articles"]){
-								/*for(var row in resp["articles"][i]){*/
-								/*if(c==0){console.log(row);c=2;}*/
 									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
 									news+=markup;
 									}
 								document.getElementById('personalizenews').innerHTML = news;
-								currentquery=query;
+								currentquery=query+" ";
+								counter=resp['counter'];
 								page=resp["page"];
 								var url=document.location.href.split("?")[0];
 								url=url.split("#")[0];
@@ -466,38 +585,131 @@ for(var i in likedlinks){
 	});
 }
 });	
-
-$("#ubuntubar2").hover(function(){
-$("#ubuntubar2").css("width","350px");
-$(".personalize2 strong").show();
-$("#recommendations").hide();
-$('.scard').css('z-index','-1');
-},function(){
-$("#ubuntubar2").css("width","100px");
-$('.scard').css('z-index','0');
-$(".personalize2 strong").hide();
-$("#recommendations").show();
-});
-$(".personalize2 strong").hover(function(){
-if($(this).css("color")!="rgb(0, 255, 0)"){
-$(this).css("color","rgb(250, 25, 20)");
-}
-},function(){
-if($(this).css("color")!="rgb(0, 255, 0)"){
-$(this).css("color","white");
-}
-});
-$(".personalize2 strong").click(function(){
-var a=$(this).html().split("/")[0];
-if($(this).css("color")!="rgb(0, 255, 0)"){
-$("#searchtext").val($.trim($("#searchtext").val()+" "+a));
-$(this).css("color","rgb(0, 255, 0)");
+var counter=0;
+$(".terms").click(function(){
+var query="";
+counter+=1;
+//console.log(counter);
+if(currentquery.length<1){
+if($(".selectedcat").parent().find('strong').length==0){
+query+="Business News"+" "+currentquery+$(this).html()+" ";
 }
 else{
-//$("#searchtext").val($.trim($("#searchtext").val().replace(a,"")));
-//$(this).css("color","white");
+query+=$(".selectedcat").parent().find('strong').html()+" "+currentquery+$(this).html()+" ";
 }
-});			
+}
+else{
+if(counter==1){
+query+=currentquery+$(this).html()+" ";
+}
+else{
+var temp=currentquery.split(" ");
+//console.log(temp);
+temp=temp.slice(0,temp.length-2);
+//console.log(temp);
+if(temp[temp.length-1]=="Current"){
+	temp=temp.slice(0,temp.length-1);
+}
+temp=temp.join(" ");
+query+=temp+" "+$(this).html();
+//console.log(query);
+}
+}
+currentquery=query;
+var jsonFile = new XMLHttpRequest();
+	$("body").css({'background':'white','z-index':'-1'});
+	$("#loadingimage").css('display','flex');
+	var url = "/news?query="+query+"&page="+page+"&counter="+counter;
+	jsonFile.open("GET",url,true);
+    jsonFile.send();
+    jsonFile.onreadystatechange = function(){
+    if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+		console.log("gotit");
+		var resp=JSON.parse(jsonFile.responseText);
+        var news = '';
+		if(resp){
+								var c=0;
+								maxpage=resp["maxpage"];
+								for(var i in resp["articles"]){
+									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
+									news+=markup;
+									}
+								document.getElementById('personalizenews').innerHTML = news;
+								page=resp["page"];
+								counter=resp["counter"];
+								var url=document.location.href.split("?")[0];
+								url=url.split("#")[0];
+								window.history.pushState('',document.titile,url);
+								$('#nextpage').attr('href','#page='+(page+1).toString());
+								
+								$('#nextpage').attr('onclick',"nextpagefunc()");
+								
+								$('#prevpage').attr('href','#page='+(page-1).toString());
+								
+								$('#prevpage').attr('onclick',"prevpagefunction()");
+								
+								
+								abcd();
+							}
+							$("body").css({'background':'#1e88e5','z-index':'0'});
+							$("#ubuntubar2").css('width','100px');
+							$("#loadingimage").hide();
+}
+}
+});
+
+function selectalltheme(){
+currentquery=currentquery.replace($(".selectedcat").parent().find('strong').html(),"");
+$(".selectedcat").css("border","2px solid");
+$(".selectedcat").removeClass("selectedcat");
+if(currentquery.length>0){
+currentquery=currentquery;
+}
+else{
+currentquery="Business News";
+}
+	var url = "/news?query="+currentquery+"&page="+page;
+	$("body").css({'background':'white','z-index':'-1'});
+	$("#loadingimage").css('display','flex');
+	var jsonFile = new XMLHttpRequest();
+	jsonFile.open("GET",url,true);
+    jsonFile.send();
+    jsonFile.onreadystatechange = function(){
+    if (jsonFile.readyState== 4 && jsonFile.status == 200) {
+		console.log("gotit");
+		var resp=JSON.parse(jsonFile.responseText);
+        var news = '';
+		if(resp){
+								var c=0;
+								maxpage=resp["maxpage"];
+								for(var i in resp["articles"]){
+									markup='<div class="col-md-4 col-xs-12 scard pull-right"><div class="rowarticle"><div class="card small" style="border: 5px #FFFF00;border-radius:10px;"><div class="card-image" style="border: 5px #FFFF00;border-radius:10px;"><img class="imgs" src="'+resp["articles"][i]["img"]+'"></div><div class="card-content" style="height:100%;"><p><b>'+resp["articles"][i]["header"]+'</b></p></div><div class="mask"><img src="'+resp["articles"][i]["img"]+'" style="margin-left:20px;" width="100px" height="100px"><span style="float:right;font-size:20px;" class="glyphicon glyphicon-star"></span><a href="'+resp["articles"][i]["link"]+'" target="_blank"><h4 class="alink">'+resp["articles"][i]["header"]+'</h4><p id="just">'+$.trim(resp["articles"][i]["data"].replace(/\t/g,'').replace(/\n/g,'').replace(/\r/g,'')).substring(0,350)+'...</p></div></div></a></div><br/></div>';
+									news+=markup;
+									}
+								document.getElementById('personalizenews').innerHTML = news;
+								page=resp["page"];
+								var url=document.location.href.split("?")[0];
+								url=url.split("#")[0];
+								window.history.pushState('',document.titile,url);
+								$('#nextpage').attr('href','#page='+(page+1).toString());
+								
+								$('#nextpage').attr('onclick',"nextpagefunc()");
+								
+								$('#prevpage').attr('href','#page='+(page-1).toString());
+								
+								$('#prevpage').attr('onclick',"prevpagefunction()");
+								
+								
+								abcd();
+							}
+							$("body").css({'background':'#1e88e5','z-index':'0'});
+							$("#ubuntubar2").css('width','100px');
+							$("#loadingimage").hide();
+}
+}
+}	
+
+
 </script>
 
 {% endblock %}

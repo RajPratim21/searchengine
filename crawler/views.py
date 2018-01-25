@@ -38,12 +38,15 @@ import math
 #translator = Translator()
 from textblob import TextBlob
 import urllib, re
+from django.contrib.auth.views import password_reset_done as password_reset_done
 
+from django.contrib.auth.views import password_reset as password_reset
+from django.core.urlresolvers import reverse_lazy
 #from scraper import grabContent
 
 import nltk
 
-from search_crawler import duck_lets_go
+from search_crawler import duck_lets_go, duck_lets_go2
 
 import time
 import networkx as nx
@@ -143,16 +146,26 @@ def config(request):
                     subcategoryimg[i['theme']][j]="https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png"
         
         options=OrderedDict()
+        choice=[]
         themes_keywords=db.UserKeywords.find({'user':str(request.user)},{'_id':False,'user':False})
-        coll=db.config
+        coll=db.mainconfig
         try:
+            print "shruru"
             cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+            """for key,value in cur.items():
+                print key,value
+	    	if key=="choice":        
+                    choice=value"""
+            if cur == None:
+                coll.insert_one({"user":str(request.user),"choice":["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]})
+                cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
             for key,value in cur.items():
                 print key,value
 	    	if key=="choice":        
                     choice=value
         except:
-                choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[],"Information Technology":["Investing"]}
+                choice=["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]
+            
 
         for i in themes_keywords:
             if i['theme'] in choice:
@@ -162,9 +175,11 @@ def config(request):
                     subcategoryimg[i['theme']][j]="https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png" 
                 
         for i in choice:
-            options[i]=categoryimg[i]
-            for j in choice[i]:
-                options[j+'/'+i]=subcategoryimg[i][j]
+            temp=i.split("/")
+            if len(temp)<2:
+                options[i]=categoryimg[i]
+            else:
+                options[i]=subcategoryimg[temp[1]][temp[0]]
         
         
         for i in sorted(categories):
@@ -187,18 +202,37 @@ def add_config(request):
 	if request.user=="AnonymousUser":
 		return HttpResponseRedirect('/login')
 	print request.user
-	choices=OrderedDict()
-	priorities=request.POST.get("priorities",1)
-	priorities=json.loads(priorities,object_pairs_hook=OrderedDict)
-	print priorities
-        category=[]
+	#choices=[]
+	if request.POST.get("positions",0):
+	   priorities=request.POST.get("positions",0)
+	   priorities=json.loads(priorities,object_pairs_hook=OrderedDict)
+	   print priorities
+	   for key,value in priorities.items():
+            db.mainconfig.update_one({"user":str(request.user)},{"$push":{"choice":key},"$set":{"user":str(request.user)}}, upsert=True)
+            for i in value:
+                db.mainconfig.update_one({"user":str(request.user)},{"$push":{"choice":i},"$set":{"user":str(request.user)}}, upsert=True)
+	   response={"success":"true"}
+	   response=json.dumps(response)
+        elif request.POST.get("item",0):
+           item=request.POST.get("item",0)
+           print 'here it is ',item
+           db.mainconfig.update_one({"user":str(request.user)},{"$pull":{"choice":item},"$set":{"user":str(request.user)}}, upsert=True)
+           response={"success":"true"}
+	   response=json.dumps(response)
+	else:
+	    response={"success":"false"}
+	    response=json.dumps(response)
+	    
+        
+        #category=[]
+        
         """choices.setdefault("Mining and Drilling",[])
 	choices.setdefault("Environment",["Waste Management"])
 	choices.setdefault("Agriculture and Forestry",[])
 	choices.setdefault("Opportunities",["News and Media"])
 	choices.setdefault("Business Services",[])
         choices.setdefault("Energy",["Oil and Gas"])
-        choices.setdefault("Information Technology",["Investing"])"""
+        choices.setdefault("Information Technology",["Investing"])
 	for key in request.POST:
 	    if "cat_" in str(key):
 	       key=request.POST.get(key,"")
@@ -207,9 +241,9 @@ def add_config(request):
 	            if key[0] not in category:
         	       category.append(key[0])
        	            choices.setdefault(key[0],[])
-       	            choices[key[0]].append(key[1])
+       	            choices[key[0]].append(key[1])"""
 	#print choices
-        for i in category:
+        """for i in category:
             choices[i].sort(key=priorities[i].get)
         print choices
         priortized=sorted(category,key=priorities.keys().index)
@@ -217,10 +251,10 @@ def add_config(request):
         prioritizedchoices=OrderedDict()
         for key in priortized:
             prioritizedchoices.setdefault(key,choices[key])
-        choices=prioritizedchoices
-	db.config.update_one({"user":str(request.user)},{"$set":{"user":str(request.user),"choice":choices}}, upsert=True)
+        choices=prioritizedchoices"""
+	#db.mainconfig.update_one({"user":str(request.user)},{"$set":{"user":str(request.user),"choice":choices}}, upsert=True)
 	#import news_personalization
-	return HttpResponseRedirect('/home')
+	return HttpResponse(response)
 
 def is_absolute(url):
     return bool(urlparse.urlparse(url).netloc)
@@ -335,16 +369,29 @@ def news(request,home=False):
 	                   page=1
 	           else:
 	               page=1
-
 	           jsondata={}
 	           query=request.GET.get('query')
-		   print query
+		   print query,'cds$$$$$$$$$$$$$$$$$'
 		   temp = query.split('/')[0]
-                   print temp
-                   res=duck_lets_go(temp+" news")[3:]
-                   maxpage=len(res)/30
-                   jsondata.update({'articles':res,'page':page,'maxpage':maxpage})
+                   print temp,'ldl##############'
+                   if request.GET.get('counter'):
+                       counter=int(request.GET.get('counter'))+1                               
+                   else:
+                       counter=0
+		   #from updateindex2 import find_history
+               	   #search_hist = find_history(str(request.user), G)
+		   #if len(search_hist)>2:
+	    	   #	sq = ' '.join(search_hist[:2])
+	   	   #else:
+			#sq = ' '.join(search_hist)
+                   #print "searchhistorywala",sq
+		   print temp
+                   res=duck_lets_go2(temp.replace(' ','_')+"_latest")[3:]
+		   #print 'REACHED 1%%%%%%%%%%%%%%'
+	           #print res
+                   jsondata.update({'articles':res,'page':page,'maxpage':15,'counter':counter})
 	           return HttpResponse(json.dumps(jsondata),content_type="application/json")
+		   
                    """if len(temp)>1:
                    	if temp[0].replace(" ","").replace("_","").lower() in ["mininganddrilling","oilandgasccrawl","wastemanagement","agriculture","agricultureandforestry","opportunities","energy","environment","materials","newsandmedia","businessservices","investing","oilandgas","miningnewsandmedia","china","japan","korea"]:
                                 docstring ='doc'+temp[0].replace(" ","").replace("_","").lower()
@@ -481,43 +528,32 @@ def news(request,home=False):
                 #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
                 #response = response.json()
                 #print response
-                coll=db.config
-                try:
-                    cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
-                    for key,value in cur.items():
-                        if key=="choice":        
-                            choice=value
-                except:
-                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[],"Information Technology":["Investing"]}
+                
 
-                options=OrderedDict()
-                categoryimg={}
-                subcategoryimg={}
-                selectedcat=""
                 #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
                 #response = response.json()
                 #print response
-                coll=db.config
+                coll=db.mainconfig
                 try:
                     cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    if cur == None:
+                        coll.insert_one({"user":str(request.user),"choice":["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]})
+                        cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
                     for key,value in cur.items():
                         print key,value
-		    	if key=="choice":        
+	    	        if key=="choice":        
                             choice=value
                 except:
-                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[],"Information Technology":["Investing"]}
-
+                    choice=["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]
+                
                 options=OrderedDict()
                 categoryimg={}
                 subcategoryimg={}
                 selectedcat=""
                 themes_keywords=db.UserKeywords.find({'user':str(request.user)},{'_id':False,'user':False})
-                for key,value in choice.items():
-                    if len(value)>0:
-                        selectedcat=key+value[0]
-                    else:
-                        selectedcat=key
-                    break
+                #for key in choice:
+                 #   selectedcat=key
+                  #  break
                 
                 with open("crawler/categoryimglinks2") as f1,open("crawler/subcatimglinks2") as f2:
                     for line in f1:
@@ -529,26 +565,29 @@ def news(request,home=False):
                         catsub=line[0].split("__")
                         if catsub[0].strip() in choice:
                             subcategoryimg.setdefault(catsub[0].strip(),{})
-                            if catsub[1].strip() in choice[catsub[0].strip()]:
+                            if catsub[1].strip()+"/"+catsub[0].strip() in choice:
                                 subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
                 
                 for i in themes_keywords:
-                    if i['theme'] in choice:
+                        #print "hiiiiiii"
                         for j in i['keywords']:
+                            #print j
                             if i['theme'] not in subcategoryimg:
                                 subcategoryimg.setdefault(i['theme'],{})
                             subcategoryimg[i['theme']][j]="https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png" 
-                
+
                 for i in choice:
-                    options[i]=categoryimg[i]
-                    for j in choice[i]:
-                        options[j+'/'+i]=subcategoryimg[i][j]
+                    temp=i.split("/")
+                    if len(temp)<2:
+                        options[i]=categoryimg[i]
+                    else:
+                        options[i]=subcategoryimg[temp[1]][temp[0]]
 			
                 #print selectedcat, options
 		# api-endpoint
 		for key in options:
 		    temp=key
-		    print key
+		    #print key
 		    break
 		temp = temp.split('/')
 		"""if len(temp)>1:
@@ -733,26 +772,49 @@ def news(request,home=False):
 		try:
 			likedlinks=db.LikedPosts.find_one({'user':str(request.user)},{'cardlink':1,'_id':False})
 			likedlinks=[i.encode('utf-8') for i in likedlinks['cardlink']]
-			print likedlinks
+			#print likedlinks
 		except:
 			pass
+		res='ds'
 		if not home:
+	   	    #print 'REACHED 2.1 popmoplop ######################'
 		    if request.GET.get('query'):
-		        res=duck_lets_go(request.GET.get('query').split("/")[0]+" news")[3:]
+			
+			print 'REACHED 2.2 99999999999999999#############', request.GET.get('query').split("/")[0]+"latest"
+		        res=duck_lets_go2(request.GET.get('query').replace(' ','_')+"_latest")[3:]
                     else:
-              		res = duck_lets_go("xyz")[3:]
+			#print 'REACHED 2.2 )))))))))))))))))))'
+			#from updateindex2 import find_history
+                        #search_hist = find_history(str(request.user), G)
+                        #if len(search_hist)>5:
+        	        #        sq = ' '.join(search_hist[:5])
+                        #else:
+                    	#    sq = ' '.join(search_hist)
+                    	res=duck_lets_go2("Latest_Business_News")[3:]
+		    #maxpage=len(res)/30
               	else:
-              	    res=duck_lets_go("xyz")[3:]
+		    #from updateindex2 import find_history
+                    #search_hist = find_history(str(request.user), G)
+                    #if len(search_hist)>5:
+                    #	sq = ' '.join(search_hist[:5])
+                    #else:
+                    #   	sq = ' '.join(search_hist)
+              	    res=duck_lets_go2("Latest_Business_News")[3:]
               	    
-              	maxpage=len(res)/30
+              	    #maxpage=len(res)/30
+		maxpage=1
 		#for val in jlist:
 		#	print val['header'], val['scores'][1]
+		from updateindex2 import find_history
+                search_hist = find_history(str(request.user), G)
+
 		if True:
           		variables = Context({ 
 			'user': request.user ,
                         'title':'Demo Content',
                         'year': datetime.now().year,
                         'feed': res,
+			'search_patern':search_hist,
                         'options': options,
                         'selectedcat': selectedcat,
                         'page': page,
@@ -773,27 +835,7 @@ def news(request,home=False):
                         })
                 output = template.render(variables)
 
-		'''
-           	if os.path.exists(str(request.user)+'.txt'):
-                        with open(str(request.user)+'.txt') as json_file:
-                                data = json.load(json_file)
-                                variables = Context({ 'user': request.user ,
-                                'title':'Demo Content',
-                                'year': datetime.now().year,
-                                'feed': data
-                             })
-                        output = template.render(variables)
-                else:
-                        with open('newsjson.txt') as json_file:
-                                data = json.load(json_file)
-                                variables = Context({ 'user': request.user ,
-                                'title':'Demo Content',
-                                'year': datetime.now().year,
-                                'feed': data
-                             })
-                        output = template.render(variables)
-   
-		'''
+
 		return HttpResponse(output)
 
 
@@ -979,8 +1021,9 @@ def home(request):
                         #x = translator.translate(x, dest='zh-TW').text
 			x = TextBlob(unicode(x))
                         x = x.translate(to='zh-TW')
+		       
 		y=x+' '+theme
-		res = duck_lets_go(y)[3:]
+		res = duck_lets_go(str(y))[3:]
 	        #raise ValueError("hi")
 		for i in res:
 		    if "duckduckgo" in i.get("link"):
@@ -1235,26 +1278,27 @@ def home(request):
                 #response = requests.get('https://newsapi.org/v1/articles?source=business-insider&sortBy=top&apiKey='+ apikey )
                 #response = response.json()
                 #print response
-                coll=db.config
+                coll=db.mainconfig
                 try:
+		    print '******************'
                     cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
+                    if cur == None:
+                        coll.insert_one({"user":str(request.user),"choice":["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]})
+                        cur=coll.find_one({"user":str(request.user)},{'choice':1,'_id':False})
                     for key,value in cur.items():
                         print key,value
-		    	if key=="choice":        
+	    	        if key=="choice":        
                             choice=value
                 except:
-                    choice={"Mining and Drilling":[],"Environment":["Waste Management"],"Agriculture and Forestry":[],"Opportunities":["News and Media"],"Energy":["Oil and Gas"],"Business Services":[],"Information Technology":["Investing"]}
+                    choice=["Mining and Drilling","Environment","Waste Management/Environment","Agriculture and Forestry","Opportunities","News and Media/Opportunities","Energy","Oil and Gas/Energy","Business Services","Information Technology","Investing/Information Technology"]
 
                 options=OrderedDict()
                 categoryimg={}
                 subcategoryimg={}
                 selectedcat=""
                 themes_keywords=db.UserKeywords.find({'user':str(request.user)},{'_id':False,'user':False})
-                for key,value in choice.items():
-                    if len(value)>0:
-                        selectedcat=key+value[0]
-                    else:
-                        selectedcat=key
+                for key in choice:
+                    selectedcat=key
                     break
                     
                 if request.GET.get('theme'):
@@ -1270,21 +1314,23 @@ def home(request):
                         catsub=line[0].split("__")
                         if catsub[0].strip() in choice:
                             subcategoryimg.setdefault(catsub[0].strip(),{})
-                            if catsub[1].strip() in choice[catsub[0].strip()]:
+                            if catsub[1].strip()+"/"+catsub[0].strip() in choice:
                                 subcategoryimg[catsub[0].strip()][catsub[1].strip()]=line[1].strip()
                 
                 for i in themes_keywords:
-                    if i['theme'] in choice:
                         for j in i['keywords']:
                             if i['theme'] not in subcategoryimg:
                                 subcategoryimg.setdefault(i['theme'],{})
                             subcategoryimg[i['theme']][j]="https://incomebully.com/wp-content/uploads/2015/05/keyword-research.png" 
                 
                 for i in choice:
-                    options[i]=categoryimg[i]
-                    for j in choice[i]:
-                        options[j+'/'+i]=subcategoryimg[i][j]
-                print 'RRRRRRRRRRRRRRRR', options 
+                    temp=i.split("/")
+                    if len(temp)<2:
+                        options[i]=categoryimg[i]
+                    else:
+                        options[i]=subcategoryimg[temp[1]][temp[0]]
+                        
+                #print 'RRRRRRRRRRRRRRRR', options 
 		Scursor = db.SearchHistory.find({'user':str(request.user)})
        	 	'''
 		search_hist = []
@@ -1326,6 +1372,15 @@ def logout_page(request):
     logout(request)
     return HttpResponseRedirect('/login')
 
+
+def my_password_reset_view(request):
+    return password_reset(request,
+        template_name='registration/password_reset_form.html',
+        email_template_name='registration/password_reset_email.html',
+        subject_template_name='change password',
+        post_reset_redirect=reverse_lazy('crawler:admin_password_reset_done'),
+	password_reset_form=Password)
+
 def liked_card(request):
     if request.GET.get('card'):
         cardlink=request.GET.get('card')
@@ -1333,7 +1388,7 @@ def liked_card(request):
         cur=col.find_one({'user':str(request.user)},{'cardlink':1,'_id':False})
         cur=cur['cardlink']
         if cardlink in cur:
-            col.update_one({"user":str(request.user)},{"$pop":{"cardlink":cardlink},"$set":{"user":str(request.user)}}, upsert=True)
+            col.update_one({"user":str(request.user)},{"$pull":{"cardlink":cardlink},"$set":{"user":str(request.user)}}, upsert=True)
         else:
             col.update_one({"user":str(request.user)},{"$push":{"cardlink":cardlink},"$set":{"user":str(request.user)}}, upsert=True)
         response={"success":"true"}
