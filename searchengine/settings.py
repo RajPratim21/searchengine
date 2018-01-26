@@ -46,7 +46,7 @@ G=nx.DiGraph()
 #es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 stop_words = set(stopwords.words('english'))
 i=0
-
+'''
 with open("categoryAndTheirSubcategories",'r') as edges:
 
     for line in edges:
@@ -73,7 +73,7 @@ with open("categoryAndTheirSubcategories",'r') as edges:
         #tech_file.write(d2_string.lower()+' '+d1_string.lower()+"\n")
         #print d2_string.lower(), d1_string.lower()
         G.add_edge(d2_string.lower(),d1_string.lower())
-
+'''
 """
 with open('FinalrankingMapfile') as file:
     for line in file:

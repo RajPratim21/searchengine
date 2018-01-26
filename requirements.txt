@@ -18,7 +18,7 @@ mongoengine==0.13.0
 networkx==1.11
 nltk==3.2.5
 numpy==1.13.1
-passreset==0.3
+django-passreset==0.3
 Pillow==3.1.2
 pyahocorasick==1.1.4
 pycrypto==2.6.1
