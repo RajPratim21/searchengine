@@ -16,7 +16,7 @@ lxml==3.8.0
 matplotlib==1.5.1
 mongoengine==0.13.0
 networkx==1.11
-nltk==3.2.5
+nltk==3.4.5
 numpy==1.13.1
 django-passreset==0.3
 Pillow==3.1.2
