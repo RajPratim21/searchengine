@@ -19,7 +19,7 @@ networkx==1.11
 nltk==3.2.5
 numpy==1.13.1
 django-passreset==0.3
-Pillow==3.1.2
+Pillow==9.0.1
 pyahocorasick==1.1.4
 pycrypto==2.6.1
 pymongo==3.4.0
